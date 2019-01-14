@@ -63,7 +63,7 @@ namespace TDFramework.UIFramework
 
     public class UIPanelAssetInfoConfigCreator : Editor
     {
-        [MenuItem("UITools/生成UIPanelAssetInfoConfig配置文件", false, 1)]
+        [MenuItem("Tools/UI/生成UIPanelAssetInfoConfig配置文件", false, 1)]
         private static void CreateUIPanelAssetInfoConfig()
         {
             UIPanelAssetInfoConfig config = ScriptableObject.CreateInstance<UIPanelAssetInfoConfig>();

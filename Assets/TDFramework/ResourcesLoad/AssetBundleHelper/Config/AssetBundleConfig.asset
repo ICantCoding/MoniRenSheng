@@ -10,10 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: UIPanelAssetInfoConfig
-  m_EditorClassIdentifier: Assembly-CSharp:TDFramework.UIFramework:UIPanelAssetInfoConfig
-  list:
-  - PanelType: 0
-    ResourcePanelPath: 
-  - PanelType: 0
-    ResourcePanelPath: 
+  m_Name: AssetBundleConfig
+  m_EditorClassIdentifier: 
+  prefabABPathList: []
+  directoryABPathList:
+  - ABName: assetbundleconfig
+    DirectoryPath: Assets/TDFramework/AssetBundle/Config
