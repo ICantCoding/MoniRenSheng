@@ -1,0 +1,20 @@
+ManifestFileVersion: 0
+CRC: 452543698
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: ae53caca55b5676c3f144824a8204d55
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 4f53038dda8057f3666298e4f6bcb11a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {instanceID: 0}
+Assets:
+- Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.xml
+- Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.bytes
+- Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleConfig.asset
+Dependencies: []

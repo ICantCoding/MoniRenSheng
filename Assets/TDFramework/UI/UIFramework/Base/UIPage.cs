@@ -7,6 +7,22 @@ namespace TDFramework.UIFramework
     using UnityEngine;
     using UnityEngine.UI;
 
+    //自定义UIPanel的类型
+    public enum UIPanelType
+    {
+        Main,           //主界面UIPanel
+        Task,           //任务界面UIPanel
+        Backpack,       //背包界面UIPanel
+                        //...
+    }
+    //自定义UIView的类型
+    public enum UIViewType
+    {
+        FirstView,
+        SecondView,
+        ThirdView,
+    }
+
     public class UIPage : MonoBehaviour
     {
         #region UI字段和属性

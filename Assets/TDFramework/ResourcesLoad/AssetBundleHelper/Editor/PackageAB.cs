@@ -4,7 +4,7 @@
     打包路径Application.streamingAssetPath路径下
  */
 
-namespace TDFramework.TDAssetBundle
+namespace TDFramework
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -42,7 +42,7 @@ namespace TDFramework.TDAssetBundle
             abConfig.directoryABPathList.Add(new ABConfig.DirectoryAB()
             {
                 ABName = "assetbundleconfig",
-                DirectoryPath = "Assets/TDFramework/AssetBundle/Config"
+                DirectoryPath = "Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config"
             });
             UnityEditor.AssetDatabase.CreateAsset(abConfig, ABPathConfig.AssetBundleConfigPath);
             UnityEditor.AssetDatabase.SaveAssets();

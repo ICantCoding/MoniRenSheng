@@ -25,64 +25,39 @@
 // ***************************************************************
 // Copyright (C) 2017 The company name
 //
-// 文件名(File Name):             UIPanelAssetInfo.cs
+// 文件名(File Name):             ResourceLoadTest.cs
 // 作者(Author):                  田山杉
-// 创建时间(CreateTime):          2019-01-10 22:18:07
+// 创建时间(CreateTime):          2019-01-16 00:01:30
 // 修改者列表(modifier):
-// 模块描述(Module description):  生成UIPanel配置的ScriptableObject, 生成目录在Resources/UI/Config下
+// 模块描述(Module description):
 // ***************************************************************
 
-namespace TDFramework.UIFramework
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using TDFramework;
+
+public class ResourceLoadTest : MonoBehaviour
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEditor;
-    using System.IO;
 
-    //自定义UIPanel的类型
-    public enum UIPanelType
+    public AudioSource audioSource;
+
+    void Start()
     {
-        Main,           //主界面UIPanel
-        Task,           //任务界面UIPanel
-        Backpack,       //背包界面UIPanel
-                        //...
-    }
-    //自定义UIView的类型
-    public enum UIViewType
-    {
-        FirstView,
-        SecondView,
-        ThirdView,
+        
     }
 
-    [System.Serializable]
-    public class UIPanelAssetInfo
+    void Update()
     {
-        public UIPanelType PanelType;
-        public string ResourcePanelPath;
-    }
-
-    public class UIPanelAssetInfoConfig : ScriptableObject
-    {
-        public List<UIPanelAssetInfo> list;
-    }
-
-    public class UIPanelAssetInfoConfigCreator : Editor
-    {
-        [MenuItem("Tools/UI/生成UIPanelAssetInfoConfig配置文件", false, 1)]
-        private static void CreateUIPanelAssetInfoConfig()
+        if(Input.GetKeyDown(KeyCode.Alpha1))
         {
-            UIPanelAssetInfoConfig config = ScriptableObject.CreateInstance<UIPanelAssetInfoConfig>();
-            string configFileName = "/TDFramework/UI/UIFramework/Resources/UI/Config/UIPanelAssetInfoConfig.asset";
-            if(File.Exists(Application.dataPath + configFileName))
-            {
-                File.Delete(Application.dataPath + configFileName);
-            }
-            AssetDatabase.CreateAsset(config, "Assets" + configFileName);
-            AssetDatabase.Refresh();
+            AudioClip clip = ResourceMgr.Instance().LoadAsset<AudioClip>("Assets/GameData/Happy.mp3");
+            audioSource.clip = clip;
+            audioSource.Play();
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            ResourceMgr.Instance().UnLoadAsset(audioSource.clip, true);
         }
     }
-
 }
-

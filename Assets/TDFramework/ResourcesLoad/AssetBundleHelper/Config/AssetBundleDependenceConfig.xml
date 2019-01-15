@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AssetBundleConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ABList Path="Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleConfig.asset" Crc="2721599888" ABName="assetbundleconfig" AssetName="AssetBundleConfig.asset" />
+  <ABList Path="Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.bytes" Crc="2390658496" ABName="assetbundleconfig" AssetName="AssetBundleDependenceConfig.bytes" />
+  <ABList Path="Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.xml" Crc="2445625552" ABName="assetbundleconfig" AssetName="AssetBundleDependenceConfig.xml" />
+  <ABList Path="Packages/com.unity.analytics/DataPrivacy/DataPrivacyButton.prefab" Crc="2793722965" ABName="dataprivacybutton" AssetName="DataPrivacyButton.prefab" />
+  <ABList Path="Assets/GameData/Happy.mp3" Crc="3646846969" ABName="gamedata" AssetName="Happy.mp3" />
+</AssetBundleConfig>

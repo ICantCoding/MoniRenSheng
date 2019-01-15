@@ -15,4 +15,6 @@ MonoBehaviour:
   prefabABPathList: []
   directoryABPathList:
   - ABName: assetbundleconfig
-    DirectoryPath: Assets/TDFramework/AssetBundle/Config
+    DirectoryPath: Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config
+  - ABName: gamedata
+    DirectoryPath: Assets/GameData

@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.TDAssetBundle
+namespace TDFramework
 {
     using System.IO;
     using System.Runtime.Serialization.Formatters.Binary;
@@ -24,6 +24,27 @@ namespace TDFramework.TDAssetBundle
         public List<string> DependABList = null;
         //资源的加载完的AB包
         public AssetBundle Ab = null;
+
+        //资源对象本身,从AB包中加载出来
+        public Object Obj = null;
+        //资源唯一标识
+        public int Guid = 0;
+        //最后使用该资源的时间
+        public float LastUseTime = 0.0f;
+        //该资源的引用计数
+        private int refCount = 0;
+        public int RefCount
+        {
+            get{ return refCount; } 
+            set
+            {
+                refCount = value;
+                if(refCount < 0)
+                {
+                    Debug.LogError(AssetName + "的资源引用计数<0");
+                }
+            }
+        }
     }
     //AssetBundleItem用于维护AssetBundle的引用计数, ResouceItem中的Ab包来源于AssetBundleItem
     public class AssetBundleItem
@@ -99,18 +120,18 @@ namespace TDFramework.TDAssetBundle
         public ResourceItem LoadResourceItem(uint crc)
         {
             ResourceItem resourceItem = null;
-            if(!m_resourceItemDict.TryGetValue(crc, out resourceItem) || resourceItem == null)
+            if (!m_resourceItemDict.TryGetValue(crc, out resourceItem) || resourceItem == null)
             {
                 Debug.LogError("没有找到Crc: " + crc.ToString() + "对应的资源!");
                 return null;
             }
-            if(resourceItem.Ab != null)
+            if (resourceItem.Ab != null)
             {
                 return resourceItem;
             }
-            if(resourceItem.DependABList != null)
+            if (resourceItem.DependABList != null)
             {
-                for(int i = 0; i < resourceItem.DependABList.Count; i++)
+                for (int i = 0; i < resourceItem.DependABList.Count; i++)
                 {
                     LoadAssetBundle(resourceItem.DependABList[i]);
                 }
@@ -126,10 +147,10 @@ namespace TDFramework.TDAssetBundle
         }
         public void UnLoadResourceItem(ResourceItem item)
         {
-            if(item == null) return;
-            if(item.DependABList != null && item.DependABList.Count > 0)
+            if (item == null) return;
+            if (item.DependABList != null && item.DependABList.Count > 0)
             {
-                for(int i = 0; i < item.DependABList.Count; i++)
+                for (int i = 0; i < item.DependABList.Count; i++)
                 {
                     UnLoadAssetBundle(item.DependABList[i]);
                 }
@@ -140,15 +161,15 @@ namespace TDFramework.TDAssetBundle
         {
             AssetBundleItem abItem = null;
             uint crc = CrcHelper.StringToCRC32(abName); //AB包名字创建crc
-            if(!m_assetBundleItemDict.TryGetValue(crc, out abItem) || abItem == null)
+            if (!m_assetBundleItemDict.TryGetValue(crc, out abItem) || abItem == null)
             {
                 AssetBundle assetBundle = null;
                 string abFullPath = ABPathConfig.AssetBundleBuildTargetPath + "/" + abName;
-                if(File.Exists(abFullPath))
+                if (File.Exists(abFullPath))
                 {
                     assetBundle = AssetBundle.LoadFromFile(abFullPath);
                 }
-                if(assetBundle == null)
+                if (assetBundle == null)
                 {
                     Debug.LogError("Load AssetBundle Error: " + abFullPath);
                     return null;
@@ -168,10 +189,10 @@ namespace TDFramework.TDAssetBundle
         {
             AssetBundleItem abItem = null;
             uint crc = CrcHelper.StringToCRC32(abName);
-            if(m_assetBundleItemDict.TryGetValue(crc, out abItem) && abItem != null)
+            if (m_assetBundleItemDict.TryGetValue(crc, out abItem) && abItem != null)
             {
                 abItem.refCount--;
-                if(abItem.refCount <= 0 && abItem.assetBundle != null)
+                if (abItem.refCount <= 0 && abItem.assetBundle != null)
                 {
                     abItem.assetBundle.Unload(true);
                     abItem.Reset();

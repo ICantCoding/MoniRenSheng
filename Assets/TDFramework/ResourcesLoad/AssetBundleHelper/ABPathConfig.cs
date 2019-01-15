@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.TDAssetBundle
+namespace TDFramework
 {
     using System;
     using UnityEngine;
@@ -8,12 +8,12 @@ namespace TDFramework.TDAssetBundle
     public class ABPathConfig
     {
         public static string AssetBundleConfigPath =
-            "Assets/TDFramework/AssetBundle/Config/AssetBundleConfig.asset"; //AB包打包方式配置文件
+            "Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleConfig.asset"; //AB包打包方式配置文件
         public static string AssetBundleBuildTargetPath = Application.streamingAssetsPath + "/AssetBundles";    //AB包打包生成目录
         public static string AssetBundleDependenceXmlPath =
-            Application.dataPath + "/TDFramework/AssetBundle/Config/AssetBundleDependenceConfig.xml"; //AB包依赖xml文件
+            Application.dataPath + "/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.xml"; //AB包依赖xml文件
         public static string AssetBundleDependenceBytePath =
-        Application.dataPath + "/TDFramework/AssetBundle/Config/AssetBundleDependenceConfig.bytes"; //AB包依赖二进制文件
+        Application.dataPath + "/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.bytes"; //AB包依赖二进制文件
         //AB包依赖文件所在的AB包（依赖文件也被打包进了AB包, 并以assetbundleconfig为该AB包命名）
         public static string DependenceFile4AssetBundle = 
 			AssetBundleBuildTargetPath + "/assetbundleconfig"; 

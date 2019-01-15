@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.TDAssetBundle
+namespace TDFramework
 {
     using System.Collections;
     using System.Collections.Generic;
