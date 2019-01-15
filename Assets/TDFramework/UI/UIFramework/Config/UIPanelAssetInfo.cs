@@ -48,6 +48,13 @@ namespace TDFramework.UIFramework
         Backpack,       //背包界面UIPanel
                         //...
     }
+    //自定义UIView的类型
+    public enum UIViewType
+    {
+        FirstView,
+        SecondView,
+        ThirdView,
+    }
 
     [System.Serializable]
     public class UIPanelAssetInfo
