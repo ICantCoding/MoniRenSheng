@@ -12,14 +12,20 @@ namespace TDFramework
     {
 
         #region Unity生命周期
-        IEnumerator Start()
+        void Start()
         {
-            //读取应用初始化配置文件
-            IniHelper.LoadConfig(AppConfig.ApplicatioinConfigFileName);
-            while(!IniHelper.IsDone)
-            {
-                yield return null;
-            }
+            //下载版本号
+            DownloadVersionFile downloadVersionFile = new DownloadVersionFile(this);
+            downloadVersionFile.Download(DownloadVersionFileCallback, null);
+        }
+        #endregion
+
+
+
+        #region 回调方法
+        public void DownloadVersionFileCallback()
+        {
+
         }
         #endregion
     }

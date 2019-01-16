@@ -42,6 +42,50 @@ namespace TDFramework
     using Utils;
     using TDFramework.TDDesignMode;
 
+    //异步加载资源的优先等级
+    public enum LoadResPriority
+    {
+        RES_HIGH = 0,       //最高优先级
+        RES_MIDDLE = 1,     //一般优先级
+        RES_LOW = 2,        //低优先级
+        RES_NUM = 3         //优先级等级个数
+    }
+
+    public class AsyncLoadAssetParam
+    {
+        public List<AsyncCallBack> m_callbackList = new List<AsyncCallBack>();
+        public uint m_crc;
+        public string m_path;
+        public LoadResPriority m_priority = LoadResPriority.RES_LOW;
+
+        public void Reset()
+        {
+            m_callbackList.Clear();
+            m_crc = 0;
+            m_path = "";
+            m_priority = LoadResPriority.RES_LOW;
+        }
+    }
+
+    public class AsyncCallBack
+    {
+        //加载完成的回调
+        public OnAsyncObjFinished m_dealFinished = null;
+        //回调参数
+        public object m_param1 = null;
+        public object m_param2 = null;
+        public object m_param3 = null;
+
+        public void Reset()
+        {
+            m_dealFinished = null;
+            m_param1 = m_param2 = m_param3 = null;
+        }
+    }
+
+    public delegate void OnAsyncObjFinished(string path, Object obj, object param1 = null,
+     object param2  = null, object param3 = null);
+
     public class ResourceMgr : TDSingleton<ResourceMgr>
     {
         public bool m_loadFromAssetBundle = true; //是否从AssetBundle中加载资源
@@ -54,9 +98,29 @@ namespace TDFramework
         } = new Dictionary<uint, ResourceItem>();
         //用来存储没有被引用的ResourceItem资源
         private TDMapList<ResourceItem> m_noReferenceResourceItemMapList = new TDMapList<ResourceItem>();
+        private MonoBehaviour m_startMono;
+        //正在异步加载的资源列表
+        private List<AsyncLoadAssetParam>[] m_loadingAssetList = 
+         new List<AsyncLoadAssetParam>[(int)LoadResPriority.RES_NUM];
+        //正在异步加载的字典
+        private Dictionary<uint, AsyncLoadAssetParam> m_loadingAssetDict =
+         new Dictionary<uint, AsyncLoadAssetParam>();
+        private ClassObjectPool<AsyncLoadAssetParam> m_asyncLoadAssetParamPool =
+         ObjectManager.Instance().GetOrCreateClassObjectPool<AsyncLoadAssetParam>(50);
+        private ClassObjectPool<AsyncCallBack> m_asyncCallBackPool =
+         ObjectManager.Instance().GetOrCreateClassObjectPool<AsyncCallBack>(100);
         #endregion
 
         #region 公有方法
+        public void Init(MonoBehaviour mono)
+        {
+            for(int i = 0; i < (int)LoadResPriority.RES_NUM; i++)
+            {
+                m_loadingAssetList[i] = new List<AsyncLoadAssetParam>();
+            }
+            m_startMono = mono;
+            m_startMono.StartCoroutine(AsyncLoadAssetCoroutine()); //开启异步加载资源的协程
+        }
         //同步资源加载,仅加载不需要实例化的资源(纹理图片,音频,视频,Prefab等)
         public T LoadAsset<T>(string path) where T : UnityEngine.Object
         {
@@ -122,6 +186,50 @@ namespace TDFramework
             }
             item.RefCount--;
             DestroyResourceItem(item, destroyObj);
+        }
+        //异步加载资源, 仅仅是不需要实例化的资源,音频,图片等
+        public void AsyncLoadAsset<T>(string path, OnAsyncObjFinished dealFinished, 
+         LoadResPriority priority, object param1 = null,
+         object param2 = null, object param3 = null, uint crc = 0) where T : UnityEngine.Object
+        {
+            if(crc == 0)
+            {
+                crc = CrcHelper.StringToCRC32(path);
+            }
+            ResourceItem item = GetAssetFromAssetCache(crc);
+            if(item != null)
+            {
+                if(dealFinished != null)
+                {
+                    dealFinished(path, item.Obj, param1, param2, param3);
+                }
+                return;
+            }
+            //判断是否在加载中
+            AsyncLoadAssetParam para = null;
+            if(!m_loadingAssetDict.TryGetValue(crc, out para) || para == null)
+            {
+                para = m_asyncLoadAssetParamPool.Spawn(true);
+                para.m_crc = crc;
+                para.m_path = path;
+                para.m_priority = priority;
+                m_loadingAssetDict.Add(crc, para);
+                m_loadingAssetList[(int)priority].Add(para);
+            }
+            AsyncCallBack callback = m_asyncCallBackPool.Spawn(true);
+            callback.m_dealFinished = dealFinished;
+            callback.m_param1 = param1;
+            callback.m_param2 = param2;
+            callback.m_param3 = param3;
+            para.m_callbackList.Add(callback);
+        }
+        //异步加载资源协程
+        IEnumerator AsyncLoadAssetCoroutine()
+        {
+            while(true)
+            {
+                yield return null;
+            }
         }
         #endregion
 

@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.Pool
+namespace TDFramework
 {
     using System;
     using System.Collections;

@@ -2,7 +2,7 @@
 
 //类对象池， 用于创建类对象缓存
 
-namespace TDFramework.Pool
+namespace TDFramework
 {
     using System;
     using System.Collections;

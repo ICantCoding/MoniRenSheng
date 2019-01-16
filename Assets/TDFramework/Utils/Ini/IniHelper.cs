@@ -3,6 +3,7 @@
 namespace TDFramework.Utils.Ini
 {
 	using System;
+    using System.IO;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
@@ -12,18 +13,19 @@ namespace TDFramework.Utils.Ini
     {
 		#region 字段和属性
         private static WWW www;
-        private static bool isDone = false;
-        public static bool IsDone
+        private static bool isWwwDone = false;
+        public static bool IsWwwDone
         {
             get
             {
                 if (www != null && www.isDone)
                 {
                     Load(www.bytes);
-                    isDone = true;
-                    return isDone;
+                    isWwwDone = true;
+                    www = null;
+                    return isWwwDone;
                 }
-                return isDone;
+                return isWwwDone;
             }
         }
 		protected static Dictionary<string, Dictionary<string, string>> mDictionary =
@@ -31,9 +33,10 @@ namespace TDFramework.Utils.Ini
 		#endregion
 
 		#region 方法
-        public static void LoadConfig(string configPath)
+        //使用WWW获取加载ini文件
+        public static void LoadConfigFromWWW(string configPath)
         {
-            if (isDone)
+            if (isWwwDone)
                 return;
             if (www == null)
             {
@@ -48,16 +51,22 @@ namespace TDFramework.Utils.Ini
 #endif
             }
         }
+        //使用File加载ini文件
+        public static void LoadConfigFromStreamingAssets(string configPath)
+        {
+            string configFilePath = Application.streamingAssetsPath + "/" + configPath;
+            byte[] bytes = File.ReadAllBytes(configFilePath);
+            Load(bytes);
+        }
+        //从bytes中读取
+        public static void LoadConfigFromBytes(byte[] bytes)
+        {
+            Load(bytes);
+        }
         static void Load(byte[] bytes)
         {
-            if (isDone)
-                return;
-
             IniFileReader reader = new IniFileReader(bytes);
-
             mDictionary = reader.ReadDictionary();
-
-            www = null;
         }
         public static string Get(string mainKey, string subKey)
         {
