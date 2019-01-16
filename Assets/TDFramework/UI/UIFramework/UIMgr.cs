@@ -16,9 +16,7 @@ namespace TDFramework.UIFramework
         private Dictionary<UIPanelType, UIPanel> m_panelDict = new Dictionary<UIPanelType, UIPanel>();
         #endregion
 
-
         #region 方法
-        //UI界面Prefab从AssetBundle中加载
         public UIPanel GetUIPanel(UIPanelType type)
         {
             UIPanel panel = null;
@@ -34,13 +32,11 @@ namespace TDFramework.UIFramework
             if(m_panels.Count <= 0) return null;
             return m_panels.Peek();
         }
-        //打开指定的Panel
         public void PushPanel(UIPanelType type, bool hidePrePanel = true, bool noInteractPrePanel = true)
         {
             UIPanel panel = GetUIPanel(type);
             if(panel == null) return;
             
-            //打开下一个UIPanel的时候, 该UIPanel需要执行进入方法, 上一个UIPanel需要执行暂停方法
             UIPanel prePanel = GetTopUIPanel();
             if(prePanel != null)
             {
@@ -53,7 +49,6 @@ namespace TDFramework.UIFramework
                 m_panelDict.Add(type, panel);
             }
         }
-        //关闭栈顶页面
         public void PopPanel()
         {
             if(m_panels.Count <= 0) return;

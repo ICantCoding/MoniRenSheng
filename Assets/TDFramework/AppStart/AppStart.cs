@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.AppStart
+namespace TDFramework
 {
     using System;
     using System.Collections;

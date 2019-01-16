@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.AppStart
+namespace TDFramework
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -10,5 +10,7 @@ namespace TDFramework.AppStart
     {
         //应用开启，读取的配置文件
         public static string ApplicatioinConfigFileName = "ApplicationConfig.ini";
+        //本地保存的Version版本信息文件
+        public static string VersionFilePath = "Version/Version.ini";
     }
 }
