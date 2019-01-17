@@ -9,8 +9,19 @@ namespace TDFramework
     using TDDesignMode;
     using Utils.Ini;
 
-    public class DownloadVersionFile
+    public class DownloadVersionFile : MonoBehaviour
     {
+
+        #region 单例
+        private static DownloadVersionFile m_instance = null;
+        public static DownloadVersionFile Instance
+        {
+            get
+            {
+                return Utils.Util.GetInstance(ref m_instance, typeof(DownloadVersionFile).Name, true);
+            }
+        }
+        #endregion
         
         #region 代理
         public delegate void DownloadSuccessedCallback();
@@ -20,21 +31,10 @@ namespace TDFramework
         #endregion
 
         #region 字段和属性
-        private MonoBehaviour m_mono;
         private VersionInfo m_localVersionInfo;
         private VersionInfo m_remoteVersionInfo;
         private int m_downloadRetryCount;
         private bool m_downloadStatus = false; //下载版本文件状态, 下载成功/下载失败
-        #endregion
-
-        #region 构造函数
-        public DownloadVersionFile(MonoBehaviour mono)
-        {
-            if (mono != null)
-            {
-                m_mono = mono;
-            }
-        }
         #endregion
 
         #region 方法
@@ -42,7 +42,7 @@ namespace TDFramework
         {
             downloadSuccessedCallback = successed_callback;
             downloadFailedCallback = failed_callback;
-            m_mono.StartCoroutine(DownloadRemoteVersionInfo());
+            StartCoroutine(DownloadRemoteVersionInfo());
         }
         IEnumerator DownloadRemoteVersionInfo()
         {

@@ -9,7 +9,6 @@ namespace TDFramework
     using UnityEngine;
     using TDFramework.TDDesignMode;
     using TDFramework.Utils;
-    using TDFramework.Pool;
 
     //ResourceItem中包含AssetBundle
     public class ResourceItem

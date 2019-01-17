@@ -6,7 +6,6 @@ namespace TDFramework.TDStruct
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using TDFramework.Pool;
 
     //双向链表节点
     public class TDDoubleLinkedListNode<T> where T : class, new()

@@ -49,5 +49,19 @@ namespace TDFramework.Utils
             instance = go.GetComponent(typeof(T)) as T;
             return instance;
         }
+        //各平台下路径
+        public static string DeviceResPath()
+        {
+            switch (GameConfig.gamePlatform)
+            {
+                case GamePlatform.GamePlatform_Editor:
+                    return string.Format("{0}/", Application.dataPath);
+                case GamePlatform.GamePlatform_PC:
+                    return string.Format("{0}/", Application.streamingAssetsPath);
+                case GamePlatform.GamePlatform_Mobbile:
+                    return string.Format("{0}/", Application.persistentDataPath);
+            }
+            return string.Format("{0}/", Application.dataPath);
+        }
     }
 }
