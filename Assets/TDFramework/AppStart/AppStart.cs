@@ -13,7 +13,19 @@ namespace TDFramework
     public class AppStart : MonoBehaviour
     {
 
+        public AudioSource m_audio;
+        private AudioClip m_clip;
+
         #region Unity生命周期
+        void OnFinished(string path, object obj,
+         object param1, object param2, object param3)
+        {
+            m_clip = obj as AudioClip;
+            m_audio.clip = m_clip;
+            m_audio.Play();
+        }
+
+
         void Start()
         {
             //检查版本文件
@@ -22,7 +34,7 @@ namespace TDFramework
             //Mobile平台下Version.json信息文件放在Application.persistentDataPath目录下
             string versionFileName = "Config/Version/version.json";
             versionFileName = Util.DeviceResPath() + versionFileName;
-            if(File.Exists(versionFileName))
+            if (File.Exists(versionFileName))
             {
                 //已经下载过version.json, DeviceResPath目录下才会有version.json文件
 
@@ -37,6 +49,27 @@ namespace TDFramework
 
             //从服务器下载version.json信息, 将最新的version.json信息写入到Util.DeviceResPath目录中(更新version.json)
 
+        }
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                ResourceMgr.Instance().Init(this);
+                ResourceMgr.Instance().AsyncLoadAsset<AudioClip>("Assets/GameData/Happy.mp3", OnFinished, LoadAssetPriority.MIDDLE);
+            }
+            else if (Input.GetKeyDown(KeyCode.A))
+            {
+                ResourceMgr.Instance().UnLoadAsset(m_clip, true);
+                m_clip = null;
+                m_audio.Stop();
+                m_audio.clip = null;
+            }
+        }
+        void OnApplicationQuit()
+        {
+#if UNITY_EDITOR
+            Resources.UnloadUnusedAssets();
+#endif
         }
         #endregion
 

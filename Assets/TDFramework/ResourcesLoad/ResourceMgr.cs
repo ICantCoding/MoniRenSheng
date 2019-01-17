@@ -43,12 +43,12 @@ namespace TDFramework
     using TDFramework.TDDesignMode;
 
     //异步加载资源的优先等级
-    public enum LoadResPriority
+    public enum LoadAssetPriority
     {
-        RES_HIGH = 0,       //最高优先级
-        RES_MIDDLE = 1,     //一般优先级
-        RES_LOW = 2,        //低优先级
-        RES_NUM = 3         //优先级等级个数
+        HIGH = 0,       //最高优先级
+        MIDDLE = 1,     //一般优先级
+        LOW = 2,        //低优先级
+        NUM = 3         //优先级等级个数
     }
 
     public class AsyncLoadAssetParam
@@ -56,14 +56,16 @@ namespace TDFramework
         public List<AsyncCallBack> m_callbackList = new List<AsyncCallBack>();
         public uint m_crc;
         public string m_path;
-        public LoadResPriority m_priority = LoadResPriority.RES_LOW;
+        public bool m_Sprite = false;
+        public LoadAssetPriority m_priority = LoadAssetPriority.LOW;
 
         public void Reset()
         {
             m_callbackList.Clear();
             m_crc = 0;
             m_path = "";
-            m_priority = LoadResPriority.RES_LOW;
+            m_Sprite = false;
+            m_priority = LoadAssetPriority.LOW;
         }
     }
 
@@ -84,13 +86,16 @@ namespace TDFramework
     }
 
     public delegate void OnAsyncObjFinished(string path, Object obj, object param1 = null,
-     object param2  = null, object param3 = null);
+     object param2 = null, object param3 = null);
 
     public class ResourceMgr : TDSingleton<ResourceMgr>
     {
-        public bool m_loadFromAssetBundle = true; //是否从AssetBundle中加载资源
+        public bool m_loadFromAssetBundle = false; //是否从AssetBundle中加载资源
 
         #region 字段和属性
+        private bool m_isInit = false;
+        //最长连续卡着加载资源的时间,单位us
+        private const long MAXLOADASSETTIME = 200000;
         //用来缓存已经加载过的ResourceItem
         public Dictionary<uint, ResourceItem> AssetCacheDict
         {
@@ -100,8 +105,8 @@ namespace TDFramework
         private TDMapList<ResourceItem> m_noReferenceResourceItemMapList = new TDMapList<ResourceItem>();
         private MonoBehaviour m_startMono;
         //正在异步加载的资源列表
-        private List<AsyncLoadAssetParam>[] m_loadingAssetList = 
-         new List<AsyncLoadAssetParam>[(int)LoadResPriority.RES_NUM];
+        private List<AsyncLoadAssetParam>[] m_loadingAssetList =
+         new List<AsyncLoadAssetParam>[(int)LoadAssetPriority.NUM];
         //正在异步加载的字典
         private Dictionary<uint, AsyncLoadAssetParam> m_loadingAssetDict =
          new Dictionary<uint, AsyncLoadAssetParam>();
@@ -114,12 +119,16 @@ namespace TDFramework
         #region 公有方法
         public void Init(MonoBehaviour mono)
         {
-            for(int i = 0; i < (int)LoadResPriority.RES_NUM; i++)
+            if (m_isInit == false)
             {
-                m_loadingAssetList[i] = new List<AsyncLoadAssetParam>();
+                for (int i = 0; i < (int)LoadAssetPriority.NUM; i++)
+                {
+                    m_loadingAssetList[i] = new List<AsyncLoadAssetParam>();
+                }
+                m_startMono = mono;
+                m_startMono.StartCoroutine(AsyncLoadAssetCoroutine()); //开启异步加载资源的协程
+                m_isInit = true;
             }
-            m_startMono = mono;
-            m_startMono.StartCoroutine(AsyncLoadAssetCoroutine()); //开启异步加载资源的协程
         }
         //同步资源加载,仅加载不需要实例化的资源(纹理图片,音频,视频,Prefab等)
         public T LoadAsset<T>(string path) where T : UnityEngine.Object
@@ -167,7 +176,7 @@ namespace TDFramework
             CacheAsset2AssetCache(path, ref item, crc, obj);
             return obj;
         }
-        //卸载资源
+        //根据资源对象卸载资源
         public void UnLoadAsset(Object obj, bool destroyObj = false)
         {
             if (obj == null) return;
@@ -187,19 +196,36 @@ namespace TDFramework
             item.RefCount--;
             DestroyResourceItem(item, destroyObj);
         }
+        //根据路径卸载资源
+        public void UnloadAsset(string path, bool destroyObj = false)
+        {
+            if(string.IsNullOrEmpty(path)) return;
+            uint crc = CrcHelper.StringToCRC32(path);
+            ResourceItem item = null;
+            if(!AssetCacheDict.TryGetValue(crc, out item) || item == null)
+            {
+                return;
+            }
+            if (item == null)
+            {
+                return;
+            }
+            item.RefCount--;
+            DestroyResourceItem(item, destroyObj);
+        }
         //异步加载资源, 仅仅是不需要实例化的资源,音频,图片等
-        public void AsyncLoadAsset<T>(string path, OnAsyncObjFinished dealFinished, 
-         LoadResPriority priority, object param1 = null,
+        public void AsyncLoadAsset<T>(string path, OnAsyncObjFinished dealFinished,
+         LoadAssetPriority priority, object param1 = null,
          object param2 = null, object param3 = null, uint crc = 0) where T : UnityEngine.Object
         {
-            if(crc == 0)
+            if (crc == 0)
             {
                 crc = CrcHelper.StringToCRC32(path);
             }
             ResourceItem item = GetAssetFromAssetCache(crc);
-            if(item != null)
+            if (item != null)
             {
-                if(dealFinished != null)
+                if (dealFinished != null)
                 {
                     dealFinished(path, item.Obj, param1, param2, param3);
                 }
@@ -207,7 +233,7 @@ namespace TDFramework
             }
             //判断是否在加载中
             AsyncLoadAssetParam para = null;
-            if(!m_loadingAssetDict.TryGetValue(crc, out para) || para == null)
+            if (!m_loadingAssetDict.TryGetValue(crc, out para) || para == null)
             {
                 para = m_asyncLoadAssetParamPool.Spawn(true);
                 para.m_crc = crc;
@@ -226,10 +252,148 @@ namespace TDFramework
         //异步加载资源协程
         IEnumerator AsyncLoadAssetCoroutine()
         {
-            while(true)
+            List<AsyncCallBack> callbackList = null;
+            long lastYieldTime = System.DateTime.Now.Ticks;
+            while (true)
             {
-                yield return null;
+                bool haveYield = false;
+                for (int i = 0; i < (int)LoadAssetPriority.NUM; i++)
+                {
+                    List<AsyncLoadAssetParam> loadingList = m_loadingAssetList[i];
+                    if (loadingList.Count <= 0)
+                        continue;
+                    //取出第一个要加载的资源参数
+                    AsyncLoadAssetParam param = loadingList[0];
+                    loadingList.RemoveAt(0);
+                    callbackList = param.m_callbackList;
+
+                    Object obj = null;
+                    ResourceItem item = null;
+#if UNITY_EDITOR
+                    if (!m_loadFromAssetBundle)
+                    {
+                        obj = LoadAssetByEditor<Object>(param.m_path);
+                        //模拟异步加载
+                        yield return new WaitForSeconds(0.5f);
+                        item = AssetBundleManager.Instance().FindResourceItem(param.m_crc);
+                    }
+#endif
+                    if (obj == null)
+                    {
+                        item = AssetBundleManager.Instance().LoadResourceItem(param.m_crc);
+                        if (item != null && item.Ab != null)
+                        {
+                            AssetBundleRequest request = null;
+                            if (param.m_Sprite) //图片资源需要特殊处理,因为object不能转Sprite
+                            {
+                                request = item.Ab.LoadAssetAsync<Sprite>(item.AssetName);
+                            }
+                            else
+                            {
+                                request = item.Ab.LoadAssetAsync<Object>(item.AssetName);
+                            }
+                            yield return request;
+                            if (request.isDone)
+                            {
+                                obj = request.asset;
+                            }
+                            lastYieldTime = System.DateTime.Now.Ticks;
+                        }
+                    }
+                    CacheAsset2AssetCache(param.m_path, ref item, param.m_crc, obj, callbackList.Count);
+                    for (int j = 0; j < callbackList.Count; j++)
+                    {
+                        AsyncCallBack callback = callbackList[j];
+                        if (callback != null && callback.m_dealFinished != null)
+                        {
+                            callback.m_dealFinished(param.m_path, obj, callback.m_param1, callback.m_param2, callback.m_param3);
+                            callback.m_dealFinished = null;
+                        }
+                        callback.Reset();
+                        m_asyncCallBackPool.Recycle(callback);
+                    }
+                    obj = null;
+                    callbackList.Clear();
+                    m_loadingAssetDict.Remove(param.m_crc);
+                    param.Reset();
+                    m_asyncLoadAssetParamPool.Recycle(param);
+
+                    if (System.DateTime.Now.Ticks - lastYieldTime > MAXLOADASSETTIME)
+                    {
+                        yield return null;
+                        lastYieldTime = System.DateTime.Now.Ticks;
+                        haveYield = true;
+                    }
+                }
+                if (!haveYield || System.DateTime.Now.Ticks - lastYieldTime > MAXLOADASSETTIME)
+                {
+                    lastYieldTime = System.DateTime.Now.Ticks;
+                    yield return null;
+                }
             }
+        }
+        //预加载
+        public void PreLoadAsset(string path)
+        {
+            if(string.IsNullOrEmpty(path)) return;
+            uint crc = CrcHelper.StringToCRC32(path);
+            ResourceItem item = GetAssetFromAssetCache(crc);
+            if (item != null)
+            {
+                return ;
+            }
+            Object obj = null;
+#if UNITY_EDITOR
+            if (!m_loadFromAssetBundle)
+            {
+                item = AssetBundleManager.Instance().FindResourceItem(crc);
+                if (item.Obj != null)
+                {
+                    obj = item.Obj;
+                }
+                else
+                {
+                    obj = LoadAssetByEditor<Object>(path);
+                }
+            }
+#endif
+            if (obj == null)
+            {
+                item = AssetBundleManager.Instance().LoadResourceItem(crc);
+                if (item != null && item.Ab != null)
+                {
+                    if (item.Obj != null)
+                    {
+                        obj = item.Obj;
+                    }
+                    else
+                    {
+                        obj = item.Ab.LoadAsset<Object>(item.AssetName);
+                    }
+                }
+            }
+            CacheAsset2AssetCache(path, ref item, crc, obj);
+            //跳场景不清空缓存
+            item.Clear = false;
+            UnLoadAsset(obj, false); //预加载,放入缓存
+        }
+        //清空缓存, 当跳转场景时,有些资源需要清空,有些资源又不需要清空
+        public void ClearCache()
+        {
+            List<ResourceItem> tempList = new List<ResourceItem>();
+            foreach(ResourceItem item in AssetCacheDict.Values)
+            {
+                if(item.Clear)
+                {
+                    tempList.Add(item);
+                }
+            }
+            foreach(ResourceItem item in tempList)
+            {
+                DestroyResourceItem(item, true);
+            }
+            tempList.Clear();
+            tempList = null;
         }
         #endregion
 
@@ -293,19 +457,23 @@ namespace TDFramework
             {
                 return;
             }
-            if (!AssetCacheDict.Remove(item.Crc))
-            {
-                return;
-            }
             if (destroyCache == false)
             {
                 m_noReferenceResourceItemMapList.Insert(item);
+                return;
+            }
+            if (!AssetCacheDict.Remove(item.Crc))
+            {
                 return;
             }
             AssetBundleManager.Instance().UnLoadResourceItem(item);
             if (item.Obj != null)
             {
                 item.Obj = null;
+#if UNITY_EDITOR
+                // Resources.UnloadAsset(item.Obj); //这样子卸载不了Editor加载的资源(非通过AssetBundle方式)
+                Resources.UnloadUnusedAssets();
+#endif
             }
         }
         #endregion
