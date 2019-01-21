@@ -59,6 +59,26 @@ namespace TDFramework
             refCount = 0;
         }
     }
+    //对象池中保存的GameObjectItem数据,其中包含对象GameObject本身
+    public class GameObjectItem
+    {
+        public uint Crc = 0; //路径对应Crc
+        public ResourceItem ResourceItem; //未实例化的资源
+        public GameObject Obj = null; //实例化出来的GameObject
+        public bool Clear = true; //跳转场景是否删除该资源
+        public long Guid = 0; //存储Guid
+        public bool AlreadyRelease = false; //是否已经放回到对象池
+
+        public void Reset()
+        {
+            Crc = 0;
+            Obj = null;
+            Clear = true;
+            Guid = 0;
+            ResourceItem = null;
+            AlreadyRelease = false;
+        }
+    }
 
     public class AssetBundleManager : TDSingleton<AssetBundleManager>
     {

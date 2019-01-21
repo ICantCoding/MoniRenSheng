@@ -130,6 +130,61 @@ namespace TDFramework
                 m_isInit = true;
             }
         }
+        //同步加载资源,针对GameObject
+        public GameObjectItem LoadGameObject(string path, GameObjectItem gameObjectItem)
+        {
+            if (gameObjectItem == null)
+            {
+                return null;
+            }
+            uint crc = gameObjectItem.Crc == 0 ? CrcHelper.StringToCRC32(path) : gameObjectItem.Crc;
+            ResourceItem resouceItem = GetAssetFromAssetCache(crc);
+            if (resouceItem != null)
+            {
+                gameObjectItem.ResourceItem = resouceItem;
+                return gameObjectItem;
+            }
+            Object obj = null;
+#if UNITY_EDITOR
+            if(!m_loadFromAssetBundle)
+            {
+                resouceItem = AssetBundleManager.Instance().FindResourceItem(crc);
+                if (resouceItem.Obj != null)
+                {
+                    obj = resouceItem.Obj as Object;
+                }
+                else
+                {
+                    obj = LoadAssetByEditor<Object>(path);
+                }
+            }
+#endif
+            if (obj == null)
+            {
+                resouceItem = AssetBundleManager.Instance().LoadResourceItem(crc);
+                if (resouceItem != null && resouceItem.Ab != null)
+                {
+                    if (resouceItem.Obj != null)
+                    {
+                        obj = resouceItem.Obj as Object;
+                    }
+                    else
+                    {
+                        obj = resouceItem.Ab.LoadAsset<Object>(resouceItem.AssetName);
+                    }
+                }
+            }
+            CacheAsset2AssetCache(path, ref resouceItem, crc, obj);
+            resouceItem.Clear = gameObjectItem.Clear;
+            gameObjectItem.ResourceItem = resouceItem;
+            return gameObjectItem;
+        }
+        //卸载资源,针对GameObject
+        public void UnLoadGameObjectItem(GameObjectItem gameObjectItem, bool destoryCache = false)
+        {
+            if(gameObjectItem == null) return;
+            UnLoadAsset(gameObjectItem.ResourceItem.Obj, destoryCache);
+        }
         //同步资源加载,仅加载不需要实例化的资源(纹理图片,音频,视频,Prefab等)
         public T LoadAsset<T>(string path) where T : UnityEngine.Object
         {
@@ -199,10 +254,10 @@ namespace TDFramework
         //根据路径卸载资源
         public void UnloadAsset(string path, bool destroyObj = false)
         {
-            if(string.IsNullOrEmpty(path)) return;
+            if (string.IsNullOrEmpty(path)) return;
             uint crc = CrcHelper.StringToCRC32(path);
             ResourceItem item = null;
-            if(!AssetCacheDict.TryGetValue(crc, out item) || item == null)
+            if (!AssetCacheDict.TryGetValue(crc, out item) || item == null)
             {
                 return;
             }
@@ -335,12 +390,12 @@ namespace TDFramework
         //预加载
         public void PreLoadAsset(string path)
         {
-            if(string.IsNullOrEmpty(path)) return;
+            if (string.IsNullOrEmpty(path)) return;
             uint crc = CrcHelper.StringToCRC32(path);
             ResourceItem item = GetAssetFromAssetCache(crc);
             if (item != null)
             {
-                return ;
+                return;
             }
             Object obj = null;
 #if UNITY_EDITOR
@@ -381,14 +436,14 @@ namespace TDFramework
         public void ClearCache()
         {
             List<ResourceItem> tempList = new List<ResourceItem>();
-            foreach(ResourceItem item in AssetCacheDict.Values)
+            foreach (ResourceItem item in AssetCacheDict.Values)
             {
-                if(item.Clear)
+                if (item.Clear)
                 {
                     tempList.Add(item);
                 }
             }
-            foreach(ResourceItem item in tempList)
+            foreach (ResourceItem item in tempList)
             {
                 DestroyResourceItem(item, true);
             }

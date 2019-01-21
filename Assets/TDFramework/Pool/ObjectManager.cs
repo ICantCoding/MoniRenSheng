@@ -6,10 +6,13 @@ namespace TDFramework
     using System.Collections;
     using System.Collections.Generic;
     using TDFramework.TDDesignMode;
+    using UnityEngine;
+    using TDFramework.Utils;
 
     public class ObjectManager : TDSingleton<ObjectManager>
     {
 
+        #region 类对象池相关
         #region 字段和属性
         private Dictionary<Type, object> m_classObjectPoolDict = new Dictionary<Type, object>();
         #endregion
@@ -20,7 +23,7 @@ namespace TDFramework
         {
             Type type = typeof(T);
             object obj = null;
-            if(!m_classObjectPoolDict.TryGetValue(type, out obj) || obj == null)
+            if (!m_classObjectPoolDict.TryGetValue(type, out obj) || obj == null)
             {
                 ClassObjectPool<T> newPool = new ClassObjectPool<T>(maxCount);
                 m_classObjectPoolDict.Add(type, newPool);
@@ -28,6 +31,111 @@ namespace TDFramework
             }
             return obj as ClassObjectPool<T>;
         }
+        #endregion
+        #endregion
+
+        #region 对象池相关
+        #region 字段和属性
+        public Transform m_goPool; //对象池父物体节点
+        public Transform m_sceneGos;
+        //对象池
+        public Dictionary<uint, List<GameObjectItem>> m_gameObjectItemPoolDict = new Dictionary<uint, List<GameObjectItem>>();
+        //类对象池
+        protected ClassObjectPool<GameObjectItem> m_gameObjectItemClassPool = ObjectManager.Instance().GetOrCreateClassObjectPool<GameObjectItem>(1000);
+        //GameObjectItem的Guid为Key, GameObjectItem实例为对象的字典集合
+        protected Dictionary<long, GameObjectItem> m_gameObjectItemDict = new Dictionary<long, GameObjectItem>();
+        #endregion
+
+        #region 方法
+        public void InitGoPool(Transform goPool, Transform sceneGos)
+        {
+            m_goPool = goPool;
+            m_sceneGos = sceneGos;
+        }
+        //资源在跳转场景是否需要清空
+        public GameObject Instantiate(string path, bool setSceneObj = false, bool bClear = true)
+        {
+            uint crc = CrcHelper.StringToCRC32(path);
+            //先尝试从缓存中取实例化Obj
+            GameObjectItem gameObjectItem = GetGameObjectItemFromPool(crc);
+            if (gameObjectItem == null)
+            {
+                gameObjectItem = m_gameObjectItemClassPool.Spawn(true);
+                gameObjectItem.Crc = crc;
+                gameObjectItem.Clear = bClear;
+                ResourceMgr.Instance().LoadGameObject(path, gameObjectItem);
+                if (gameObjectItem.ResourceItem.Obj != null)
+                {
+                    gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
+                }
+            }
+            if (m_sceneGos)
+            {
+                gameObjectItem.Obj.transform.SetParent(m_sceneGos, false);
+            }
+            gameObjectItem.Guid = gameObjectItem.Obj.GetInstanceID();
+            if (!m_gameObjectItemDict.ContainsKey(gameObjectItem.Guid))
+            {
+                m_gameObjectItemDict.Add(gameObjectItem.Guid, gameObjectItem);
+            }
+            return gameObjectItem.Obj;
+        }
+        //卸载资源
+        public void ReleaseGameObjectItem(GameObject obj, int maxCacheCount = -1, bool destoryCache = false, bool recycleParent = true)
+        {
+            if (obj == null) return;
+            GameObjectItem gameObjectItem = null;
+            int tempGuid = obj.GetInstanceID();
+            if (!m_gameObjectItemDict.TryGetValue(tempGuid, out gameObjectItem) || gameObjectItem == null)
+            {
+                Debug.Log(obj.name + "并非对象池技术创建,不能回收到对象池!");
+                return;
+            }
+            if (gameObjectItem.AlreadyRelease)
+            {
+                Debug.LogError(obj.name + "该对象已经放回对象池, 检查是否清空该对象的引用!");
+                return;
+            }
+#if UNITY_EDITOR
+            obj.name += "(Recycle)";
+#endif
+            if(maxCacheCount == 0)
+            {
+                m_gameObjectItemDict.Remove(tempGuid);
+                GameObject.Destroy(gameObjectItem.Obj);
+                ResourceMgr.Instance().UnLoadGameObjectItem(gameObjectItem, destoryCache);
+                gameObjectItem.Reset();
+                m_gameObjectItemClassPool.Recycle(gameObjectItem);
+            }else
+            {
+                //回收到对象池
+                
+            }
+        }
+        //从对象池中获取对象
+        public GameObjectItem GetGameObjectItemFromPool(uint crc)
+        {
+            List<GameObjectItem> list = null;
+            if (m_gameObjectItemPoolDict.TryGetValue(crc, out list) && list != null && list.Count > 0)
+            {
+                GameObjectItem gameObjectItem = list[0];
+                list.RemoveAt(0);
+                GameObject go = gameObjectItem.Obj;
+                if (!System.Object.ReferenceEquals(go, null))
+                {
+                    gameObjectItem.AlreadyRelease = false;
+#if UNITY_EDITOR
+                    if (go.name.EndsWith("(Recycle)"))
+                    {
+                        go.name = go.name.Replace("(Recycle)", "");
+                    }
+#endif
+                }
+                return gameObjectItem;
+            }
+            return null;
+        }
+        #endregion
         #endregion
     }
 }

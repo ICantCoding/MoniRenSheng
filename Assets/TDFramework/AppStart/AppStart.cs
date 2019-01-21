@@ -15,8 +15,13 @@ namespace TDFramework
         #region Unity生命周期
         void Start()
         {
+            GameObject.DontDestroyOnLoad(gameObject);
             //下载版本信息
-            DownloadVersionFile.Instance.Download(DownloadVersionFileSuccessedCallback, DownloadVersionFileFailedCallback);
+            DownloadVersionFile.Instance.Download(DownloadVersionFileSuccessedCallback, 
+             DownloadVersionFileFailedCallback);
+            //对象池加载
+            ObjectManager.Instance().InitGoPool(transform.Find("GoPool"), transform.Find("SceneGos"));
+            
         }
         #endregion
 
