@@ -30,6 +30,8 @@ namespace TDFramework
         public int Guid = 0;
         //最后使用该资源的时间
         public float LastUseTime = 0.0f;
+        //跳转场景时,该资源是否需要清除
+        public bool Clear = false;
         //该资源的引用计数
         private int refCount = 0;
         public int RefCount
