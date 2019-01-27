@@ -25,39 +25,21 @@
 // ***************************************************************
 // Copyright (C) 2017 The company name
 //
-// 文件名(File Name):             ResourceLoadTest.cs
+// 文件名(File Name):             GlobalHelper.cs
 // 作者(Author):                  田山杉
-// 创建时间(CreateTime):          2019-01-16 00:01:30
+// 创建时间(CreateTime):          2019-01-27 10:59:11
 // 修改者列表(modifier):
-// 模块描述(Module description):
+// 模块描述(Module description):  TDFramework框架的全局信息帮助类
 // ***************************************************************
 
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TDFramework;
-
-public class ResourceLoadTest : MonoBehaviour
+namespace TDFramework
 {
+    using System.Collections;
+    using System.Collections.Generic;
+    using UnityEngine;
 
-    public AudioSource audioSource;
-
-    void Start()
+    public class GlobalHelper
     {
-        
-    }
-
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            AudioClip clip = ResourceMgr.Instance.LoadAsset<AudioClip>("Assets/GameData/Happy.mp3");
-            audioSource.clip = clip;
-            audioSource.Play();
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            ResourceMgr.Instance.UnLoadAsset(audioSource.clip, true);
-        }
+        public static SceneInfoMgr SceneInfoMgr = new SceneInfoMgr();
     }
 }

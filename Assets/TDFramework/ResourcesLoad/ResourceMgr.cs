@@ -4,7 +4,7 @@
 //                           o8888888o                          //
 //                           88" . "88                          //
 //                           (| -_- |)                          //
-//                           O\  =  /O                          //    
+//                           O\  =  /O                          //
 //                        ____/`---'\____                       //
 //                      .'  \\|     |//  `.                     //
 //                     /  \\|||  :  |||//  \                    //
@@ -40,7 +40,6 @@ namespace TDFramework
     using UnityEngine;
     using TDFramework.TDStruct;
     using Utils;
-    using TDFramework.TDDesignMode;
 
     //异步加载资源的优先等级
     public enum LoadAssetPriority
@@ -88,7 +87,7 @@ namespace TDFramework
     public delegate void OnAsyncObjFinished(string path, Object obj, object param1 = null,
      object param2 = null, object param3 = null);
 
-    public class ResourceMgr : TDSingleton<ResourceMgr>
+    public class ResourceMgr : Singleton<ResourceMgr>
     {
         public bool m_loadFromAssetBundle = false; //是否从AssetBundle中加载资源
 
@@ -111,9 +110,9 @@ namespace TDFramework
         private Dictionary<uint, AsyncLoadAssetParam> m_loadingAssetDict =
          new Dictionary<uint, AsyncLoadAssetParam>();
         private ClassObjectPool<AsyncLoadAssetParam> m_asyncLoadAssetParamPool =
-         ObjectManager.Instance().GetOrCreateClassObjectPool<AsyncLoadAssetParam>(50);
+         ObjectManager.Instance.GetOrCreateClassObjectPool<AsyncLoadAssetParam>(50);
         private ClassObjectPool<AsyncCallBack> m_asyncCallBackPool =
-         ObjectManager.Instance().GetOrCreateClassObjectPool<AsyncCallBack>(100);
+         ObjectManager.Instance.GetOrCreateClassObjectPool<AsyncCallBack>(100);
         #endregion
 
         #region 公有方法
@@ -148,7 +147,7 @@ namespace TDFramework
 #if UNITY_EDITOR
             if(!m_loadFromAssetBundle)
             {
-                resouceItem = AssetBundleManager.Instance().FindResourceItem(crc);
+                resouceItem = AssetBundleManager.Instance.FindResourceItem(crc);
                 if (resouceItem.Obj != null)
                 {
                     obj = resouceItem.Obj as Object;
@@ -161,7 +160,7 @@ namespace TDFramework
 #endif
             if (obj == null)
             {
-                resouceItem = AssetBundleManager.Instance().LoadResourceItem(crc);
+                resouceItem = AssetBundleManager.Instance.LoadResourceItem(crc);
                 if (resouceItem != null && resouceItem.Ab != null)
                 {
                     if (resouceItem.Obj != null)
@@ -202,7 +201,7 @@ namespace TDFramework
 #if UNITY_EDITOR
             if (!m_loadFromAssetBundle)
             {
-                item = AssetBundleManager.Instance().FindResourceItem(crc);
+                item = AssetBundleManager.Instance.FindResourceItem(crc);
                 if (item.Obj != null)
                 {
                     obj = item.Obj as T;
@@ -215,7 +214,7 @@ namespace TDFramework
 #endif
             if (obj == null)
             {
-                item = AssetBundleManager.Instance().LoadResourceItem(crc);
+                item = AssetBundleManager.Instance.LoadResourceItem(crc);
                 if (item != null && item.Ab != null)
                 {
                     if (item.Obj != null)
@@ -330,12 +329,12 @@ namespace TDFramework
                         obj = LoadAssetByEditor<Object>(param.m_path);
                         //模拟异步加载
                         yield return new WaitForSeconds(0.5f);
-                        item = AssetBundleManager.Instance().FindResourceItem(param.m_crc);
+                        item = AssetBundleManager.Instance.FindResourceItem(param.m_crc);
                     }
 #endif
                     if (obj == null)
                     {
-                        item = AssetBundleManager.Instance().LoadResourceItem(param.m_crc);
+                        item = AssetBundleManager.Instance.LoadResourceItem(param.m_crc);
                         if (item != null && item.Ab != null)
                         {
                             AssetBundleRequest request = null;
@@ -401,7 +400,7 @@ namespace TDFramework
 #if UNITY_EDITOR
             if (!m_loadFromAssetBundle)
             {
-                item = AssetBundleManager.Instance().FindResourceItem(crc);
+                item = AssetBundleManager.Instance.FindResourceItem(crc);
                 if (item.Obj != null)
                 {
                     obj = item.Obj;
@@ -414,7 +413,7 @@ namespace TDFramework
 #endif
             if (obj == null)
             {
-                item = AssetBundleManager.Instance().LoadResourceItem(crc);
+                item = AssetBundleManager.Instance.LoadResourceItem(crc);
                 if (item != null && item.Ab != null)
                 {
                     if (item.Obj != null)
@@ -521,7 +520,7 @@ namespace TDFramework
             {
                 return;
             }
-            AssetBundleManager.Instance().UnLoadResourceItem(item);
+            AssetBundleManager.Instance.UnLoadResourceItem(item);
             if (item.Obj != null)
             {
                 item.Obj = null;

@@ -18,7 +18,7 @@ namespace TDFramework
         {
             get { return m_clientSocket; }
         }
-        private static byte[] m_datas = new byte[MemoryStream.BUFFER_MAX];
+        private static byte[] m_datas = new byte[1024];
         #endregion
 
         #region 方法
@@ -113,7 +113,7 @@ namespace TDFramework
                 int successReceiveBytes = 0;
                 try
                 {
-                    successReceiveBytes = m_clientSocket.Receive(m_datas, MemoryStream.BUFFER_MAX, 0);
+                    successReceiveBytes = m_clientSocket.Receive(m_datas, 1024, 0);
                 }
                 catch(SocketException e)
                 {

@@ -5,11 +5,10 @@ namespace TDFramework
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using TDFramework.TDDesignMode;
     using UnityEngine;
     using TDFramework.Utils;
 
-    public class ObjectManager : TDSingleton<ObjectManager>
+    public class ObjectManager : Singleton<ObjectManager>
     {
 
         #region 类对象池相关
@@ -41,7 +40,7 @@ namespace TDFramework
         //对象池
         public Dictionary<uint, List<GameObjectItem>> m_gameObjectItemPoolDict = new Dictionary<uint, List<GameObjectItem>>();
         //类对象池
-        protected ClassObjectPool<GameObjectItem> m_gameObjectItemClassPool = ObjectManager.Instance().GetOrCreateClassObjectPool<GameObjectItem>(1000);
+        protected ClassObjectPool<GameObjectItem> m_gameObjectItemClassPool = ObjectManager.Instance.GetOrCreateClassObjectPool<GameObjectItem>(1000);
         //GameObjectItem的Guid为Key, GameObjectItem实例为对象的字典集合
         protected Dictionary<long, GameObjectItem> m_gameObjectItemDict = new Dictionary<long, GameObjectItem>();
         #endregion
@@ -63,7 +62,7 @@ namespace TDFramework
                 gameObjectItem = m_gameObjectItemClassPool.Spawn(true);
                 gameObjectItem.Crc = crc;
                 gameObjectItem.Clear = bClear;
-                ResourceMgr.Instance().LoadGameObject(path, gameObjectItem);
+                ResourceMgr.Instance.LoadGameObject(path, gameObjectItem);
                 if (gameObjectItem.ResourceItem.Obj != null)
                 {
                     gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
@@ -103,7 +102,7 @@ namespace TDFramework
             {
                 m_gameObjectItemDict.Remove(tempGuid);
                 GameObject.Destroy(gameObjectItem.Obj);
-                ResourceMgr.Instance().UnLoadGameObjectItem(gameObjectItem, destoryCache);
+                ResourceMgr.Instance.UnLoadGameObjectItem(gameObjectItem, destoryCache);
                 gameObjectItem.Reset();
                 m_gameObjectItemClassPool.Recycle(gameObjectItem);
             }else

@@ -1,5 +1,6 @@
 {
-    "version":"1.0.1",
+    "app_version": "1.0.1",
+    "res_version": "1.0.1",
     "app_download_url":"http://192.168.0.111:3333/",
     "res_download_url":"http://192.168.0.111:3333/",
     "download_fail_retry":3,

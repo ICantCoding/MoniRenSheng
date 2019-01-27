@@ -25,39 +25,34 @@
 // ***************************************************************
 // Copyright (C) 2017 The company name
 //
-// 文件名(File Name):             ResourceLoadTest.cs
+// 文件名(File Name):             SyncLoadScene.cs
 // 作者(Author):                  田山杉
-// 创建时间(CreateTime):          2019-01-16 00:01:30
+// 创建时间(CreateTime):          2019-01-27 10:17:27
 // 修改者列表(modifier):
-// 模块描述(Module description):
+// 模块描述(Module description):  同步加载场景
 // ***************************************************************
 
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TDFramework;
-
-public class ResourceLoadTest : MonoBehaviour
+namespace TDFramework
 {
+    using System.Collections;
+    using System.Collections.Generic;
+    using UnityEngine;
+    using UnityEngine.SceneManagement;
 
-    public AudioSource audioSource;
-
-    void Start()
+    public class LoadSceneMgr : Singleton<LoadSceneMgr>
     {
-        
-    }
-
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        #region 方法
+        //直接加载某个场景,中间不需要Loading场景过渡
+        public void LoadScene(string sceneName)
         {
-            AudioClip clip = ResourceMgr.Instance.LoadAsset<AudioClip>("Assets/GameData/Happy.mp3");
-            audioSource.clip = clip;
-            audioSource.Play();
+            SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         }
-        if(Input.GetKeyDown(KeyCode.Alpha2))
+        //加载过渡场景,再转入需要跳转到的场景
+        public void LoadLoadingSceneToOtherScene(string toSceneName)
         {
-            ResourceMgr.Instance.UnLoadAsset(audioSource.clip, true);
+            GlobalHelper.SceneInfoMgr.NextSceneInfo = GlobalHelper.SceneInfoMgr.GetSceneInfoByName(toSceneName);
+            SceneManager.LoadScene(GlobalHelper.SceneInfoMgr.LoadingScene);
         }
+        #endregion
     }
 }

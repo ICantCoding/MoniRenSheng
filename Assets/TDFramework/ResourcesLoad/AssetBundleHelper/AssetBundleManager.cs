@@ -7,7 +7,6 @@ namespace TDFramework
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    using TDFramework.TDDesignMode;
     using TDFramework.Utils;
 
     //ResourceItem中包含AssetBundle
@@ -80,7 +79,7 @@ namespace TDFramework
         }
     }
 
-    public class AssetBundleManager : TDSingleton<AssetBundleManager>
+    public class AssetBundleManager : Singleton<AssetBundleManager>
     {
 
         #region 字段和属性
@@ -90,7 +89,7 @@ namespace TDFramework
          new Dictionary<uint, AssetBundleItem>();
         //AssetBundleItem的类对象池
         protected ClassObjectPool<AssetBundleItem> m_assetBundleItemPool =
-         ObjectManager.Instance().GetOrCreateClassObjectPool<AssetBundleItem>(500);
+         ObjectManager.Instance.GetOrCreateClassObjectPool<AssetBundleItem>(500);
         #endregion	
 
         #region 构造函数

@@ -27,7 +27,7 @@ namespace TDFramework.TDStruct
         public TDDoubleLinkedListNode<T> Tail = null;
         //双向链表节点类对象池
         protected ClassObjectPool<TDDoubleLinkedListNode<T>> m_doubleLinkedListNodePool =
-            ObjectManager.Instance().GetOrCreateClassObjectPool<TDDoubleLinkedListNode<T>>(500);
+            ObjectManager.Instance.GetOrCreateClassObjectPool<TDDoubleLinkedListNode<T>>(500);
         //节点个数
         protected int m_count = 0;
         public int Count

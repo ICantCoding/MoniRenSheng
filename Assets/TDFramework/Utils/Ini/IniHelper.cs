@@ -7,7 +7,6 @@ namespace TDFramework.Utils.Ini
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-	using TDFramework.TDDesignMode;
 
     public class IniHelper
     {

@@ -10,6 +10,8 @@ namespace TDFramework
     {
         //应用开启，读取的配置文件
         public static string ApplicatioinConfigFileName = "ApplicationConfig.ini";
+
+        #region 版本更新相关配置参数
         //本地version.json文件相对路径
         public static string VersionFilePath = "Config/Version/version.json";
         //远程version.json下载地址
@@ -18,6 +20,7 @@ namespace TDFramework
         public static int DownloadVersionFileTimeout = 10;
         //下载version.json的最多次数
         public static int DownloadVersionFileFailedTryCount = 3;
+        #endregion
         
     }
 }

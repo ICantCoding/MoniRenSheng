@@ -6,7 +6,6 @@ namespace TDFramework
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Networking;
-    using TDDesignMode;
     using Utils.Ini;
     using TDFramework.Utils;
     using System.IO;
@@ -75,7 +74,7 @@ namespace TDFramework
                     m_localVersion = version;
                 }
             }
-            Debug.Log("oldVersion: " + m_localVersion.ToString());
+            Debug.Log("LocalVersion: " + m_localVersion.ToString());
             //从服务器下载version.json信息, 将最新的version.json信息写入到Util.DeviceResPath目录中(更新version.json)
             Download();
         }
@@ -102,8 +101,6 @@ namespace TDFramework
                 {
                     m_downloadStatus = true;
                 }
-                request.Abort();
-                request.Dispose();
             }
             if (m_downloadStatus)
             {
@@ -111,9 +108,9 @@ namespace TDFramework
                 {
                     byte[] bytes = request.downloadHandler.data;
                     string content = System.Text.Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                    m_remoteVersion = VersionHelper.JsonForVersion(content);
+                    m_remoteVersion = VersionHelper.JsonText2Version(content);
                     VersionHelper.WriteLocalVersionFile(m_remoteVersion);
-                    Debug.Log("remoteVersion: " + m_remoteVersion.ToString());
+                    Debug.Log("RemoteVersion: " + m_remoteVersion.ToString());
                     VersionStatus versionStatus = VersionHelper.CompareLocalAndRemoteVersion(m_localVersion, m_remoteVersion);
                     downloadSuccessedCallback(versionStatus);
                 }
@@ -125,6 +122,8 @@ namespace TDFramework
                     downloadFailedCallback();
                 }
             }
+            request.Abort();
+            request.Dispose();
         }
         #endregion
 

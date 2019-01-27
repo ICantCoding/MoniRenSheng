@@ -25,39 +25,43 @@
 // ***************************************************************
 // Copyright (C) 2017 The company name
 //
-// 文件名(File Name):             ResourceLoadTest.cs
+// 文件名(File Name):             LaunchSplash.cs
 // 作者(Author):                  田山杉
-// 创建时间(CreateTime):          2019-01-16 00:01:30
+// 创建时间(CreateTime):          2019-01-26 23:00:45
 // 修改者列表(modifier):
-// 模块描述(Module description):
+// 模块描述(Module description):  App的LaunchSplash场景, 用于启动画面的设计
 // ***************************************************************
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TDFramework;
+using UnityEngine.UI;
 
-public class ResourceLoadTest : MonoBehaviour
+public class LaunchSplash : MonoBehaviour
 {
 
-    public AudioSource audioSource;
+    #region 字段
+    private float m_showTime = 3.0f;
+    #endregion
 
+    #region UI字段
+    
+    #endregion
+
+    #region Unity生命周期
     void Start()
     {
-        
+        StartCoroutine(JumpAppStartScene());
     }
+    #endregion
 
-    void Update()
+    #region 方法
+    private IEnumerator JumpAppStartScene()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            AudioClip clip = ResourceMgr.Instance.LoadAsset<AudioClip>("Assets/GameData/Happy.mp3");
-            audioSource.clip = clip;
-            audioSource.Play();
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            ResourceMgr.Instance.UnLoadAsset(audioSource.clip, true);
-        }
+        yield return new WaitForSeconds(m_showTime);
+        //LoadSceneMgr.Instance.LoadScene(GlobalHelper.SceneInfoMgr.AppStartScene); //同步直接跳转
+        LoadSceneMgr.Instance.LoadLoadingSceneToOtherScene(GlobalHelper.SceneInfoMgr.AppStartScene); //Loading过渡跳转
     }
+    #endregion
 }
