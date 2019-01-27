@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: AssetBundleConfig
   m_EditorClassIdentifier: 
-  prefabABPathList: []
+  prefabABPathList:
+  - Assets/Res/Prefab
   directoryABPathList:
   - ABName: assetbundleconfig
     DirectoryPath: Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config
-  - ABName: gamedata
-    DirectoryPath: Assets/GameData
+  - ABName: materials
+    DirectoryPath: Assets/Res/Materials
+  - ABName: music
+    DirectoryPath: Assets/Res/Music

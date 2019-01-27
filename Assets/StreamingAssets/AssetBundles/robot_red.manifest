@@ -1,0 +1,37 @@
+ManifestFileVersion: 0
+CRC: 1414816226
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 930ec302912914f5a51f4d2d7c561cf0
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 9efa0356622aeb9d0887ac5c257bdecc
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 90
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+Assets:
+- Assets/Res/SciFi Robots/Textures/Chr_FPS_D_Red.TGA
+- Assets/Res/SciFi Robots/Materials/Ironman_Red.mat
+- Assets/Res/SciFi Robots/Textures/Chr_FPS_02_M.TGA
+- Assets/Res/SciFi Robots/Model/Robot.FBX
+- Assets/Res/Prefab/Robot_Red.prefab
+- Assets/Res/SciFi Robots/Textures/Chr_FPS_N.TGA
+Dependencies: []

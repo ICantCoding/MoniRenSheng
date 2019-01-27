@@ -1,13 +1,27 @@
 ManifestFileVersion: 0
-CRC: 2789964801
+CRC: 3749857895
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
       Name: assetbundleconfig
       Dependencies: {}
     Info_1:
-      Name: gamedata
+      Name: materials
       Dependencies: {}
     Info_2:
-      Name: dataprivacybutton
+      Name: music
+      Dependencies: {}
+    Info_3:
+      Name: darkdragon
+      Dependencies: {}
+    Info_4:
+      Name: robot_blue
+      Dependencies:
+        Dependency_0: robot_red
+    Info_5:
+      Name: robot_gray
+      Dependencies:
+        Dependency_0: robot_red
+    Info_6:
+      Name: robot_red
       Dependencies: {}

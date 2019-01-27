@@ -30,7 +30,9 @@ namespace TDFramework
 
     public class PackageAssetBundle
     {
+        //Key为打包目录的AssetBundleName, Value为打包目录Assets/相对路径
         private static Dictionary<string, string> m_directoryABDict = new Dictionary<string, string>();
+        //Key为预制件的AssetBundleName, Value为该预制件依赖的所有资源文件Assets/相对路径
         private static Dictionary<string, List<string>> m_prefabABDict = new Dictionary<string, List<string>>();
         private static List<string> m_buildedFiles = new List<string>(); //记录已经被标记了要打包的文件, 用于过滤，避免打包到重复的文件
         private static List<string> m_loadFiles = new List<string>(); //记录哪些会被动态加载的文件
@@ -57,6 +59,12 @@ namespace TDFramework
             m_prefabABDict.Clear();
             m_buildedFiles.Clear();
             m_loadFiles.Clear();
+
+            //创建打包目的目录
+            if(!Directory.Exists(ABPathConfig.AssetBundleBuildTargetPath))
+            {
+                Directory.CreateDirectory(ABPathConfig.AssetBundleBuildTargetPath);
+            }
 
             //读取打包策略对应的配置文件
             ABConfig abConfig = AssetDatabase.LoadAssetAtPath<ABConfig>(ABPathConfig.AssetBundleConfigPath);
@@ -132,6 +140,9 @@ namespace TDFramework
                 AssetDatabase.RemoveAssetBundleName(assetBundleName, true);
             }
 
+            //生成Md5文件
+            CreateMd5File4AssetBundleFiles();
+
             //刷新Project面板
             AssetDatabase.Refresh();
             Debug.Log("打包成功...");
@@ -165,7 +176,7 @@ namespace TDFramework
                     {
                         continue;
                     }
-                    dict.Add(assetBundleAllFiles[j], assetBundleNameAry[i]); //这个文件和对应这个文件所在的AB包名
+                    dict.Add(assetBundleAllFiles[j], assetBundleNameAry[i]); //这个文件Assets/相对路径和对应这个文件所在的AB包名
                 }
             }
 
@@ -276,6 +287,35 @@ namespace TDFramework
                 }
             }
             return false;
+        }
+
+        //生成记录所有AssetBundle包的Md5文件
+        private static void CreateMd5File4AssetBundleFiles()
+        {
+            try
+            {
+                List<string> list = new List<string>();
+                Util.Recursive(ABPathConfig.AssetBundleBuildTargetPath, ref list);
+                string outPath = Util.DeviceResPath() + AppConfig.AssetBundleMd5FilePath;
+                FileStream fs = new FileStream(outPath, FileMode.CreateNew);
+                StreamWriter sw = new StreamWriter(fs);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    string file = list[i];
+                    if (file.EndsWith(".manifest")) continue;
+                    string md5 = MD5Helper.Md5File(file);
+                    file = file.Replace("\\", "/");
+                    file = file.Remove(0, file.LastIndexOf("/") + 1);
+                    sw.WriteLine(file + "|" + md5);
+                }
+                fs.Flush();
+                sw.Close();
+                fs.Close();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("CreateMd5File4AssetBundleFiles error: " + e.Message);
+            }
         }
     }
 }

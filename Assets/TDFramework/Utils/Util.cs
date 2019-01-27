@@ -1,10 +1,11 @@
 
 
-namespace TDFramework.Utils
+namespace TDFramework
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.IO;
     using UnityEngine;
 
     public class Util
@@ -62,6 +63,23 @@ namespace TDFramework.Utils
                     return string.Format("{0}/", Application.persistentDataPath);
             }
             return string.Format("{0}/", Application.dataPath);
+        }
+        //获取文件目录下,所有的文件路径
+        public static void Recursive(string path, ref List<string> list)
+        {
+            if (Directory.Exists(path))
+            {
+                DirectoryInfo direction = new DirectoryInfo(path);
+                FileInfo[] files = direction.GetFiles("*", SearchOption.AllDirectories);
+                for (int i = 0; i < files.Length; i++)
+                {
+                    if (files[i].Name.EndsWith(".cs") || files[i].Name.EndsWith(".meta") || files[i].Name.EndsWith(".json"))
+                    {
+                        continue;
+                    }
+                    list.Add(files[i].FullName);
+                }
+            }
         }
     }
 }

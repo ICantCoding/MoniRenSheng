@@ -1,0 +1,35 @@
+ManifestFileVersion: 0
+CRC: 79485154
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f1eff6685dea28f754e4f5a0643f4291
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 9efa0356622aeb9d0887ac5c257bdecc
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 90
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+Assets:
+- Assets/Res/SciFi Robots/Textures/Chr_FPS_D_Gray.TGA
+- Assets/Res/Prefab/Robot_Gray.prefab
+- Assets/Res/SciFi Robots/Materials/Ironman_Gray.mat
+Dependencies:
+- C:/Users/ShanWazi/Desktop/MoniRenSheng/Assets/StreamingAssets/AssetBundles/robot_red

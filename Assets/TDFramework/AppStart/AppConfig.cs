@@ -21,6 +21,10 @@ namespace TDFramework
         //下载version.json的最多次数
         public static int DownloadVersionFileFailedTryCount = 3;
         #endregion
+
+        #region 资源更新相关配置参数
+        public static string AssetBundleMd5FilePath = "Config/Md5/md5file.txt";
+        #endregion
         
     }
 }

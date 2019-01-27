@@ -19,7 +19,7 @@ namespace TDFramework
         {
             get
             {
-                return Utils.Util.GetInstance(ref m_instance, typeof(DownloadVersionFile).Name, true);
+                return Util.GetInstance(ref m_instance, typeof(DownloadVersionFile).Name, true);
             }
         }
         #endregion
