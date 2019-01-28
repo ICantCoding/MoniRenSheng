@@ -1,5 +1,39 @@
 
 
+//////////////////////////////////////////////////////////////////
+//                            _ooOoo_                           //
+//                           o8888888o                          //
+//                           88" . "88                          //
+//                           (| -_- |)                          //
+//                           O\  =  /O                          //    
+//                        ____/`---'\____                       //
+//                      .'  \\|     |//  `.                     //
+//                     /  \\|||  :  |||//  \                    //
+//                    /  _||||| -:- |||||-  \                   //
+//                    |   | \\\  -  /// |   |                   //
+//                    | \_|  ''\---/''  |   |                   //
+//                    \  .-\__  `-`  ___/-. /                   //
+//                  ___`. .'  /--.--\  `. . __                  //
+//               ."" '<  `.___\_<|>_/___.'  >'"".               //
+//              | | :  `- \`.;`\ _ /`;.`/ - ` : | |             //
+//              \  \ `-.   \_ __\ /__ _/   .-` /  /             //
+//         ======`-.____`-.___\_____/___.-`____.-'======        //
+//                            `=---='                           //
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^         //
+//           佛祖保佑 程序员一生平安,健康,快乐,没有Bug!            //
+//////////////////////////////////////////////////////////////////
+
+// ***************************************************************
+// Copyright (C) 2017 The company name
+//
+// 文件名(File Name):             DownloadMd5File.cs
+// 作者(Author):                  田山杉
+// 创建时间(CreateTime):          2019-01-28 22:07:55
+// 修改者列表(modifier):
+// 模块描述(Module description):  用于下载服务器远端Version.json文件
+// ***************************************************************
+
+
 namespace TDFramework
 {
     using System.Collections;
@@ -12,18 +46,6 @@ namespace TDFramework
 
     public class DownloadVersionFile : MonoBehaviour
     {
-
-        #region 单例
-        private static DownloadVersionFile m_instance = null;
-        public static DownloadVersionFile Instance
-        {
-            get
-            {
-                return Util.GetInstance(ref m_instance, typeof(DownloadVersionFile).Name, true);
-            }
-        }
-        #endregion
-
         #region 代理
         public delegate void DownloadSuccessedCallback(VersionStatus status);
         public delegate void DownloadFailedCallback();
@@ -33,23 +55,30 @@ namespace TDFramework
 
         #region 字段和属性
         private string m_downloadurl;
-        private Version m_localVersion;
-        private Version m_remoteVersion;
         private int m_downloadRetryCount = 3;
         private int m_downloadTimeout = 10;
-        private bool m_downloadStatus = false; //下载版本文件状态, 下载成功/下载失败
+        private float m_downloadTryAgainDelay = 2.0f;
+
+        private Version m_localVersion;
+        private Version m_remoteVersion;
         private VersionStatus m_versionStatus = VersionStatus.None; //版本号比较结果
         #endregion
 
-        #region 方法
-        public void Download(DownloadSuccessedCallback successed_callback, DownloadFailedCallback failed_callback)
+        #region 构造方法
+        public DownloadVersionFile(DownloadSuccessedCallback successed_callback, DownloadFailedCallback failed_callback)
         {
+            m_downloadurl = AppConfig.RemoteVersionFileUrl;
+            m_downloadTimeout = AppConfig.DownloadFileTimeout;
+            m_downloadRetryCount = AppConfig.DownloadFileFailedTryCount;
+            m_downloadTryAgainDelay = AppConfig.DownloadFileTryAgainDelay;
             downloadSuccessedCallback = successed_callback;
             downloadFailedCallback = failed_callback;
-            m_downloadurl = AppConfig.RemoteVersionFileUrl;
-            m_downloadTimeout = AppConfig.DownloadVersionFileTimeout;
-            m_downloadRetryCount = AppConfig.DownloadVersionFileFailedTryCount;
+        }
+        #endregion
 
+        #region 方法
+        public void Download()
+        {
             //检查版本文件
             //Editor平台下Version.json信息文件放在Application.dataPath目录下
             //PC平台下Version.json信息文件放在Application.streamingAssetsPath目录下
@@ -76,38 +105,35 @@ namespace TDFramework
             }
             Debug.Log("LocalVersion: " + m_localVersion.ToString());
             //从服务器下载version.json信息, 将最新的version.json信息写入到Util.DeviceResPath目录中(更新version.json)
-            Download();
+            DownloadRemoteVersion();
         }
-        private void Download()
+        private void DownloadRemoteVersion()
         {
-            StartCoroutine(DownloadRemoteVersionInfo());
+            m_downloadRetryCount--;
+            DownloadTextFile.Instance.Download(m_downloadurl, DownloadRemoteVersionCompelete,
+            m_downloadTryAgainDelay, m_downloadTimeout);
         }
-        IEnumerator DownloadRemoteVersionInfo()
+        private void DownloadRemoteVersionCompelete(string content)
         {
-            UnityWebRequest request = null;
-            while (m_downloadStatus == false && m_downloadRetryCount > 0)
+            if (string.IsNullOrEmpty(content))
             {
-                request = UnityWebRequest.Get(m_downloadurl);
-                request.timeout = m_downloadTimeout;
-                yield return request.SendWebRequest();
-                byte[] bytes = request.downloadHandler.data;
-
-                if (request.responseCode != 200)
+                //下载失败, 判断是否需要继续下载
+                if (m_downloadRetryCount > 0)
                 {
-                    //下载配置文件失败
-                    m_downloadRetryCount--;
+                    DownloadRemoteVersion(); //再次下载
                 }
                 else
                 {
-                    m_downloadStatus = true;
+                    if (downloadFailedCallback != null)
+                    {
+                        downloadFailedCallback();
+                    }
                 }
             }
-            if (m_downloadStatus)
+            else
             {
                 if (downloadSuccessedCallback != null)
                 {
-                    byte[] bytes = request.downloadHandler.data;
-                    string content = System.Text.Encoding.UTF8.GetString(bytes, 0, bytes.Length);
                     m_remoteVersion = VersionHelper.JsonText2Version(content);
                     VersionHelper.WriteLocalVersionFile(m_remoteVersion);
                     Debug.Log("RemoteVersion: " + m_remoteVersion.ToString());
@@ -115,20 +141,7 @@ namespace TDFramework
                     downloadSuccessedCallback(versionStatus);
                 }
             }
-            else
-            {
-                if (downloadFailedCallback != null)
-                {
-                    downloadFailedCallback();
-                }
-            }
-            request.Abort();
-            request.Dispose();
         }
-        #endregion
-
-        #region 辅助方法
-
         #endregion
     }
 }

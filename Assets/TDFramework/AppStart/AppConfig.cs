@@ -17,13 +17,15 @@ namespace TDFramework
         //远程version.json下载地址
         public static string RemoteVersionFileUrl = "http://192.168.0.111:3333/" + VersionFilePath;
         //下载version.json的超时时间设置
-        public static int DownloadVersionFileTimeout = 10;
+        public static int DownloadFileTimeout = 10;
         //下载version.json的最多次数
-        public static int DownloadVersionFileFailedTryCount = 3;
+        public static int DownloadFileFailedTryCount = 3;
+        //下载失败下次下载的延时时间
+        public static float DownloadFileTryAgainDelay = 2.0f;
         #endregion
 
         #region 资源更新相关配置参数
-        public static string AssetBundleMd5FilePath = "Config/Md5/md5file.txt";
+        public static string Md5FilePath = "Config/Md5/md5file.txt";
         #endregion
         
     }

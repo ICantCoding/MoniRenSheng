@@ -296,7 +296,7 @@ namespace TDFramework
             {
                 List<string> list = new List<string>();
                 Util.Recursive(ABPathConfig.AssetBundleBuildTargetPath, ref list);
-                string outPath = Util.DeviceResPath() + AppConfig.AssetBundleMd5FilePath;
+                string outPath = Util.DeviceResPath() + AppConfig.Md5FilePath;
                 FileStream fs = new FileStream(outPath, FileMode.CreateNew);
                 StreamWriter sw = new StreamWriter(fs);
                 for (int i = 0; i < list.Count; i++)

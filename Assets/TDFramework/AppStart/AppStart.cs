@@ -17,11 +17,10 @@ namespace TDFramework
         {
             // GameObject.DontDestroyOnLoad(gameObject);
             // //下载版本信息
-            DownloadVersionFile.Instance.Download(DownloadVersionFileSuccessedCallback, 
-             DownloadVersionFileFailedCallback);
+            new DownloadVersionFile(DownloadVersionFileSuccessedCallback, 
+             DownloadVersionFileFailedCallback).Download();
             // //对象池加载
             // ObjectManager.Instance().InitGoPool(transform.Find("GoPool"), transform.Find("SceneGos"));
-            
         }
         #endregion
 
