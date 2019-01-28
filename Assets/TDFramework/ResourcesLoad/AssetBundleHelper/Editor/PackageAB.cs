@@ -297,6 +297,7 @@ namespace TDFramework
                 List<string> list = new List<string>();
                 Util.Recursive(ABPathConfig.AssetBundleBuildTargetPath, ref list);
                 string outPath = Util.DeviceResPath() + AppConfig.Md5FilePath;
+                if(File.Exists(outPath)) File.Delete(outPath);
                 FileStream fs = new FileStream(outPath, FileMode.CreateNew);
                 StreamWriter sw = new StreamWriter(fs);
                 for (int i = 0; i < list.Count; i++)
@@ -305,7 +306,7 @@ namespace TDFramework
                     if (file.EndsWith(".manifest")) continue;
                     string md5 = MD5Helper.Md5File(file);
                     file = file.Replace("\\", "/");
-                    file = file.Remove(0, file.LastIndexOf("/") + 1);
+                    file = file.Replace(Application.streamingAssetsPath + "/", "");
                     sw.WriteLine(file + "|" + md5);
                 }
                 fs.Flush();

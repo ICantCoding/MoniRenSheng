@@ -64,12 +64,13 @@ namespace TDFramework
             yield return request.SendWebRequest();
             byte[] bytes = request.downloadHandler.data;
             string content = System.Text.Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-            if(request.responseCode != 200)
+            if (request.responseCode != 200)
             {
-                if(done != null) done(null);
-            }else
+                if (done != null) done(null);
+            }
+            else
             {
-                if(done != null)done(content);
+                if (done != null) done(content);
             }
             request.Abort();
             request.Dispose();

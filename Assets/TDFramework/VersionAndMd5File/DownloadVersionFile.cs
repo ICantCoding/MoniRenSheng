@@ -135,7 +135,8 @@ namespace TDFramework
                 if (downloadSuccessedCallback != null)
                 {
                     m_remoteVersion = VersionHelper.JsonText2Version(content);
-                    VersionHelper.WriteLocalVersionFile(m_remoteVersion);
+                    #warning 这里不要立即写入, 需要等Game版本完全更新成功后才能写入最新版本号
+                    VersionHelper.WriteLocalVersionFile(m_remoteVersion); 
                     Debug.Log("RemoteVersion: " + m_remoteVersion.ToString());
                     VersionStatus versionStatus = VersionHelper.CompareLocalAndRemoteVersion(m_localVersion, m_remoteVersion);
                     downloadSuccessedCallback(versionStatus);

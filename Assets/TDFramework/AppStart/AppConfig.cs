@@ -25,7 +25,12 @@ namespace TDFramework
         #endregion
 
         #region 资源更新相关配置参数
+        //本地Md5File.txt文件相对路径
         public static string Md5FilePath = "Config/Md5/md5file.txt";
+        //下载缓存的TempMd5File.txt文件相对路径
+        public static string Temp_Md5FilePath = "Config/Md5/temp_md5file.txt";
+        //远程Md5Fiel.txt下载地址
+        public static string RemoteMd5FileUrl = "http://192.168.0.111:3333/" + Md5FilePath;
         #endregion
         
     }

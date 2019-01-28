@@ -40,6 +40,12 @@ namespace TDFramework
 
     public class DownloadMd5File
     {
+
+        public delegate void DownloadSuccssedCallback(string content);
+        public delegate void DownloadFailedCallback();
+        public DownloadSuccssedCallback downloadSuccessedCallback;
+        public DownloadFailedCallback downloadFailedCallback;
+
         #region 字段
         private string m_downloadurl;
         private int m_downloadRetryCount = 3;
@@ -48,12 +54,14 @@ namespace TDFramework
         #endregion
 
         #region 构造函数
-        public DownloadMd5File()
+        public DownloadMd5File(DownloadSuccssedCallback s_callback, DownloadFailedCallback f_callback)
         {
-            m_downloadurl = AppConfig.RemoteVersionFileUrl;
+            m_downloadurl = AppConfig.RemoteMd5FileUrl;
             m_downloadTimeout = AppConfig.DownloadFileTimeout;
             m_downloadRetryCount = AppConfig.DownloadFileFailedTryCount;
             m_downloadTryAgainDelay = AppConfig.DownloadFileTryAgainDelay;
+            downloadSuccessedCallback = s_callback;
+            downloadFailedCallback = f_callback;
         }
         #endregion
         
@@ -80,13 +88,13 @@ namespace TDFramework
                 else
                 {
                     //下载彻底失败
-
+                    if(downloadFailedCallback != null) downloadFailedCallback();
                 }
             }
             else
             {
                 //下载成功
-
+                if(downloadSuccessedCallback != null) downloadSuccessedCallback(content);
             }
         }
         #endregion

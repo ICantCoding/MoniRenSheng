@@ -59,7 +59,8 @@ namespace TDFramework
         //读取本地Md5File文件转Dictionary
         public static Dictionary<string, string> LocalMd5File2Dict(string fileName = "")
         {
-            string path = string.IsNullOrEmpty(fileName) ? string.Format("{0}{1}", Util.DeviceResPath(), AppConfig.Md5FilePath) : fileName;
+            string path = string.Format("{0}{1}", Util.DeviceResPath(), 
+            string.IsNullOrEmpty(fileName) ? AppConfig.Md5FilePath : fileName);
             if (!File.Exists(path)) return new Dictionary<string, string>();
             try
             {
