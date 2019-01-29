@@ -31,6 +31,8 @@ namespace TDFramework
         public static string Temp_Md5FilePath = "Config/Md5/temp_md5file.txt";
         //远程Md5Fiel.txt下载地址
         public static string RemoteMd5FileUrl = "http://192.168.0.111:3333/" + Md5FilePath;
+        //资源下载地址
+        public static string ResourcesDownloadUrl = "http://192.168.0.111:3333/";
         #endregion
         
     }

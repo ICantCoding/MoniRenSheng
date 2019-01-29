@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.Download
+namespace TDFramework
 {
     using System.Collections;
     using System.Collections.Generic;

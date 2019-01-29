@@ -304,7 +304,7 @@ namespace TDFramework
                 {
                     string file = list[i];
                     if (file.EndsWith(".manifest")) continue;
-                    string md5 = MD5Helper.Md5File(file);
+                    string md5 = Md5Helper.Md5File(file);
                     file = file.Replace("\\", "/");
                     file = file.Replace(Application.streamingAssetsPath + "/", "");
                     sw.WriteLine(file + "|" + md5);

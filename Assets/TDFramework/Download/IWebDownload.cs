@@ -2,7 +2,7 @@
 
 
 
-namespace TDFramework.Download
+namespace TDFramework
 {
     using System;
 

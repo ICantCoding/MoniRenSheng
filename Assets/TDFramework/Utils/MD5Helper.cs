@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.Utils
+namespace TDFramework
 {
     using System;
     using System.IO;
@@ -9,7 +9,7 @@ namespace TDFramework.Utils
     using System.Collections;
     using System.Collections.Generic;
 
-    public class MD5Helper
+    public class Md5Helper
     {
 
         //对字符串进行MD5计算
