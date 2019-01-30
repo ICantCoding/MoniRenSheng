@@ -45,8 +45,8 @@ namespace TDFramework
         private Dictionary<string, string> m_localMd5Dict;
         private Dictionary<string, string> m_remoteMd5Dict;
         private Dictionary<string, string> m_tempMd5Dict;
-        private Queue<SDownloadConfig> m_needDownloadConfigQueue;
-        public Queue<SDownloadConfig> NeedDownloadConfigQueue
+        private Queue<SGameUpdaterDownloadConfig> m_needDownloadConfigQueue;
+        public Queue<SGameUpdaterDownloadConfig> NeedDownloadConfigQueue
         {
             get { return m_needDownloadConfigQueue; }
             set{m_needDownloadConfigQueue = value;}
@@ -59,7 +59,7 @@ namespace TDFramework
             m_localMd5Dict = Md5FileHelper.LocalMd5File2Dict();
             m_remoteMd5Dict = Md5FileHelper.Md5Text2Dict(remoteMd5);
             m_tempMd5Dict = Md5FileHelper.LocalMd5File2Dict(AppConfig.Temp_Md5FilePath);
-            m_needDownloadConfigQueue = new Queue<SDownloadConfig>();
+            m_needDownloadConfigQueue = new Queue<SGameUpdaterDownloadConfig>();
             InitNeedDownloadFileQueue();
         }
         #endregion
@@ -118,20 +118,20 @@ namespace TDFramework
         public void EnqueueNeedDownloadConfigQuque(string fileName)
         {
             //资源本身
-            SDownloadConfig config = new SDownloadConfig();
+            SGameUpdaterDownloadConfig config = new SGameUpdaterDownloadConfig();
             config.fileName = fileName;
-            config.download_url = AppConfig.ResourcesDownloadUrl + fileName;
-            config.local_url = string.Format("{0}{1}", Util.DeviceResPath() + fileName);
-            config.download_timeout = AppConfig.DownloadFileTimeout;
-            config.download_failed_retry = AppConfig.DownloadFileFailedTryCount;
+            config.downloadUrl = AppConfig.ResourcesDownloadUrl + fileName;
+            config.localUrl = string.Format("{0}{1}", Util.DeviceResPath() + fileName);
+            config.downloadTimeout = AppConfig.DownloadFileTimeout;
+            config.downloadFailRetry = AppConfig.DownloadFileFailedTryCount;
             m_needDownloadConfigQueue.Enqueue(config);
             //资源manifest文件
-            SDownloadConfig manifestConfig = new SDownloadConfig();
+            SGameUpdaterDownloadConfig manifestConfig = new SGameUpdaterDownloadConfig();
             manifestConfig.fileName = string.Format("{0}.manifest", fileName);
-            manifestConfig.local_url = string.Format("{0}{1}", Util.DeviceResPath() + manifestConfig.fileName);
-            manifestConfig.download_url = string.Format("{0}.manifest", config.download_url);
-            manifestConfig.download_timeout = AppConfig.DownloadFileTimeout;
-            manifestConfig.download_failed_retry = AppConfig.DownloadFileFailedTryCount;
+            manifestConfig.localUrl = string.Format("{0}{1}", Util.DeviceResPath() + manifestConfig.fileName);
+            manifestConfig.downloadUrl = string.Format("{0}.manifest", config.downloadUrl);
+            manifestConfig.downloadTimeout = AppConfig.DownloadFileTimeout;
+            manifestConfig.downloadFailRetry = AppConfig.DownloadFileFailedTryCount;
             m_needDownloadConfigQueue.Enqueue(manifestConfig);
         }
         //把正在下载的资源文件写入到TempMd5中, 下载完成后需要从TempMd5中删除
@@ -172,8 +172,8 @@ namespace TDFramework
                 m_localMd5Dict.Add(file, md5);
             }
         }
-        //退出时将md5写到文件
-        public void Destroy()
+        //更新资源成功后将md5写到文件保存
+        public void UpdateMd5File()
         {
             Md5FileHelper.Dict2LocalMd5File(m_localMd5Dict, string.Format("{0}/{1}", Util.DeviceResPath() + AppConfig.Md5FilePath));
             Md5FileHelper.Dict2LocalMd5File(m_tempMd5Dict, string.Format("{0}/{1}", Util.DeviceResPath() + AppConfig.Temp_Md5FilePath));

@@ -4,6 +4,8 @@ namespace TDFramework
     using System;
     using UnityEngine.Networking;
     
+
+    #region ------------------------------ 结构体定义
     public struct SWebDownloadParams
     {
         public string download_url;
@@ -13,16 +15,6 @@ namespace TDFramework
         public Action<int> OnComplete;
         public Action<bool, int, int> OnSizeComplete;
     }
-
-    public enum DownloadEventType
-    {
-        SizeComplete,
-        Progress,
-        OneComplete,
-        AllComplete,
-        Error,
-    }
-
     public struct SWebDownloadEvent
     {
         public DownloadEventType EventType;
@@ -33,7 +25,6 @@ namespace TDFramework
             this.objs = objs;
         }
     }
-
     public struct SDownloadFileResult
     {
         //文件总大小
@@ -45,15 +36,16 @@ namespace TDFramework
         //已下载的大小字符串 （人类可读的）
         public string downloadedLengthStr;
     }
+    #endregion
 
-    public struct RequestHandler
+    #region ------------------------------------- 枚举
+    public enum DownloadEventType
     {
-        public UnityWebRequest request;
-        public UnityDownloadFileHandler handler;
-        public RequestHandler(UnityWebRequest request, UnityDownloadFileHandler handler)
-        {
-            this.request = request;
-            this.handler = handler;
-        }
+        SizeComplete,           //资源大小获取完成
+        Progress,               //资源进度
+        OneComplete,            //一个资源下载完成
+        AllComplete,            //所有资源下载完成
+        Error,                  //资源下载出错
     }
+    #endregion
 }

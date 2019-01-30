@@ -5,7 +5,6 @@ namespace TDFramework.Utils
     
     public class HumanRead
     {
-
         //将size大小转化为人类可读的大小
         public static string HumanReadableFilesize(double size)
         {

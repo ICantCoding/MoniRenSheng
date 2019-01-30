@@ -83,6 +83,7 @@ namespace TDFramework
             m_currParams.download_url = url;
             m_currParams.timeout = timeout;
             m_currParams.OnSizeComplete = complete;
+            //开启线程下载
             ThreadPool.SetMaxThreads(1, 1);
             ThreadPool.QueueUserWorkItem(new WaitCallback(DownloadFileSizeCallback), null);
         }
@@ -93,7 +94,7 @@ namespace TDFramework
             m_request.Proxy = WebRequest.DefaultWebProxy;
             try
             {
-                m_response = m_request.GetResponse() as HttpWebResponse;
+                m_response = m_request.GetResponse() as HttpWebResponse; //会阻塞, 但是是子线程, 没关系
                 m_eventQueue.Enqueue(new SWebDownloadEvent(DownloadEventType.SizeComplete,
                  true, m_response.StatusCode, (int)m_response.ContentLength));
             }

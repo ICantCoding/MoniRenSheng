@@ -54,14 +54,14 @@ namespace TDFramework
         #endregion
 
         #region 构造函数
-        public DownloadMd5File(DownloadSuccssedCallback s_callback, DownloadFailedCallback f_callback)
+        public DownloadMd5File(DownloadSuccssedCallback successCallback, DownloadFailedCallback failCallback)
         {
             m_downloadurl = AppConfig.RemoteMd5FileUrl;
             m_downloadTimeout = AppConfig.DownloadFileTimeout;
             m_downloadRetryCount = AppConfig.DownloadFileFailedTryCount;
             m_downloadTryAgainDelay = AppConfig.DownloadFileTryAgainDelay;
-            downloadSuccessedCallback = s_callback;
-            downloadFailedCallback = f_callback;
+            downloadSuccessedCallback = successCallback;
+            downloadFailedCallback = failCallback;
         }
         #endregion
         

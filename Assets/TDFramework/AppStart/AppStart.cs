@@ -15,23 +15,19 @@ namespace TDFramework
         #region Unity生命周期
         void Start()
         {
-            // GameObject.DontDestroyOnLoad(gameObject);
-            // //下载版本信息
-            new DownloadVersionFile(DownloadVersionFileSuccessedCallback, 
-             DownloadVersionFileFailedCallback).Download();
+            GameObject.DontDestroyOnLoad(gameObject);
+            //更新资源(如果有资源需要更新的话, 没有就会跳过)
+            new DownloadVersionFile(DownloadVersionFileSuccessedCallback,
+             () =>
+             {
+                 Debug.Log("版本信息下载失败!请检查网络!");
+             }).Download();
             // //对象池加载
             // ObjectManager.Instance().InitGoPool(transform.Find("GoPool"), transform.Find("SceneGos"));
         }
         #endregion
 
 
-
-
-
-
-
-
-        
 
         #region 回调
         public void DownloadVersionFileSuccessedCallback(VersionStatus status)
@@ -41,28 +37,30 @@ namespace TDFramework
                 case VersionStatus.High:
                     {
                         //本地与远端Md5File做比较,下载新的资源, 开始下载资源
-                        ResourcesDownloadCallbackTable table = new ResourcesDownloadCallbackTable()
-                        {
-                            Error = ResourcesDownloadError,
-                            Befor = ResourcesDownloadBefor,
-                            Progress = ResourcesDownloadProgress,
-                            OneComplete = ResourcesDownloadOneComplete,
-                            AllComplete = ResourcesDownloadAllComplete,
-                        };
-                        DownloadResources resourcesUpdate = new DownloadResources(table);
+                        DownloadResources();
                         break;
                     }
                 case VersionStatus.Equal:
-                    {
+                    {   
                         break;
                     }
                 default:
                     break;
             }
         }
-        public void DownloadVersionFileFailedCallback()
+        private void DownloadResources()
         {
-            Debug.Log("版本信息下载失败!请检查网络!");
+            SGameUpdaterCallback table = new SGameUpdaterCallback()
+            {
+                Error = ResourcesDownloadError,
+                Befor = ResourcesDownloadBefor,
+                Progress = ResourcesDownloadProgress,
+                OneComplete = ResourcesDownloadOneComplete,
+                AllComplete = ResourcesDownloadAllComplete,
+                NotNeedUpdate = ResourcesDownloadNotNeedUpdate,
+            };
+            GameUpdater gameUpdater = new GameUpdater(table);
+            gameUpdater.StartDownload(); //开始下载最新资源
         }
         public void ResourcesDownloadError(string content)
         {
@@ -84,8 +82,11 @@ namespace TDFramework
         {
 
         }
+        public void ResourcesDownloadNotNeedUpdate()
+        {
+
+        }
         #endregion
     }
 
-    
 }

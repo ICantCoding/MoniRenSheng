@@ -7,6 +7,18 @@ namespace TDFramework
     using UnityEngine;
     using UnityEngine.Networking;
 
+    
+    public struct RequestHandler
+    {
+        public UnityWebRequest request;
+        public UnityDownloadFileHandler handler;
+        public RequestHandler(UnityWebRequest request, UnityDownloadFileHandler handler)
+        {
+            this.request = request;
+            this.handler = handler;
+        }
+    }
+
     public class UnityWeb : MonoBehaviour, IWebDownload
     {
 
