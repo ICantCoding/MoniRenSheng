@@ -1,5 +1,5 @@
 
-namespace TDFramework
+namespace TDFramework.Network
 {
     using System;
     using System.Net;
@@ -9,7 +9,9 @@ namespace TDFramework
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class NetworkInterface : MonoBehaviour
+    public delegate void MessageHandler(Packet msg);
+
+    public class NetworkInterface
     {
         #region 字段和属性
         private static ManualResetEvent TimeoutManualResetEvent = new ManualResetEvent(false); //初始没有信号量, 即出现阻塞
@@ -18,15 +20,20 @@ namespace TDFramework
         {
             get { return m_clientSocket; }
         }
-        private static byte[] m_datas = new byte[1024];
+        private MessageReader msgReader = new MessageReader();
+        private static byte[] m_datas = new byte[MemoryStream.BUFFER_MAX];
+        //请求报文接收响应flowId对应消息的处理回调
+        public Dictionary<uint, MessageHandler> flowHandlers = new Dictionary<uint, MessageHandler>();
+        #endregion
+
+        #region 构造函数
+        public NetworkInterface(NetworkEngine engine)
+        {
+            msgReader.MainLoop = engine;
+        }
         #endregion
 
         #region 方法
-        //检查m_clientSocket是否已经连接
-        public bool Valid()
-        {
-            return ((m_clientSocket != null) && (m_clientSocket.Connected == true));
-        }
         //客户端Socket请求连接服务器
         public bool Connect(string ip, int port)
         {
@@ -36,12 +43,13 @@ namespace TDFramework
             TimeoutManualResetEvent.Reset();
 
             m_clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            m_clientSocket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 123);
+            m_clientSocket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, MemoryStream.BUFFER_MAX);
             try
             {
                 IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(ip), port);
                 m_clientSocket.BeginConnect(endPoint, new AsyncCallback(ClientConnectCallback), m_clientSocket);
-                if (TimeoutManualResetEvent.WaitOne(10000)) //如果当前实例收到信号，则为 true, 否则为 false.
+                //如果当前实例收到信号，则为 true, 否则为 false. 超过10s还未收到信号，返回false
+                if (TimeoutManualResetEvent.WaitOne(10000))  
                 {
                     if (Valid() == false)
                     {
@@ -63,7 +71,7 @@ namespace TDFramework
             return Valid();
         }
         //发送数据包
-        public void Send(byte[] datas, uint flowId)
+        public void Send(byte[] datas, uint flowId, MessageHandler handler)
         {
             if(Valid() == false)
             {
@@ -75,6 +83,8 @@ namespace TDFramework
                 Debug.Log("Client Socket Send Data is null.");
                 return;
             }
+            //添加接收响应报文时候的回调函数
+            flowHandlers[flowId] = handler == null ? p => {} : handler;
             try
             {
                 m_clientSocket.Send(datas);
@@ -103,7 +113,7 @@ namespace TDFramework
                 Debug.Log("Client Socket Disconnected.");
                 return;
             }
-            if(m_clientSocket.Poll(0, SelectMode.SelectRead))
+            if(m_clientSocket.Poll(0, SelectMode.SelectRead)) //避免recv方法阻塞, Poll是否会阻塞？
             {
                 if(Valid() == false)
                 {
@@ -113,7 +123,7 @@ namespace TDFramework
                 int successReceiveBytes = 0;
                 try
                 {
-                    successReceiveBytes = m_clientSocket.Receive(m_datas, 1024, 0);
+                    successReceiveBytes = m_clientSocket.Receive(m_datas, MemoryStream.BUFFER_MAX, 0);
                 }
                 catch(SocketException e)
                 {
@@ -155,8 +165,25 @@ namespace TDFramework
                     return;
                 }
                 Debug.Log("Client Socket Success Received Data: " + successReceiveBytes);
-                #warning 接收到数据需要处理
+                msgReader.Process(m_datas, (System.UInt32)successReceiveBytes, flowHandlers);
             }
+        }
+        public void Process() 
+		{
+			if(Valid())
+			{
+				Recv();
+			}
+			else
+			{
+                //网络连接断开避免子线程死循环卡死
+				System.Threading.Thread.Sleep(50);
+			}
+		}
+        //检查m_clientSocket是否已经连接
+        public bool Valid()
+        {
+            return ((m_clientSocket != null) && (m_clientSocket.Connected == true));
         }
         //关闭Socket
         public void Close()
@@ -179,6 +206,7 @@ namespace TDFramework
             {
                 Close();
             }
+            msgReader = new MessageReader();
             TimeoutManualResetEvent.Set();
         }
         #endregion

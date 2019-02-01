@@ -1,0 +1,14 @@
+{
+    "ModuleName1" : {
+        "Id" : 1,
+        "Message1" : 1,
+        "Message2" : 2,
+        "Message3" : 3
+    },
+    "ModuleName2" : {
+        "Id" : 2,
+        "Message1" : 1,
+        "Message2" : 2,
+        "Message3" : 3
+    }
+}
