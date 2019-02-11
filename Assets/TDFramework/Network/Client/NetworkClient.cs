@@ -6,7 +6,7 @@ namespace TDFramework.Network
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class NetwoekClient : MonoBehaviour
+    public class NetworkClient : MonoBehaviour
     {
 
         #region 字段
