@@ -10,13 +10,13 @@ namespace TDFramework.Network
     {
 
         #region 字段
-        private NetworkEngine m_networkEngine;
+        public NetworkEngine m_networkEngine = new NetworkEngine();
         #endregion
 
         #region Unity生命周期
         void Update()
         {
-            m_networkEngine.UpdateInMainThread();
+            // m_networkEngine.UpdateInMainThread();
         }
         #endregion
 

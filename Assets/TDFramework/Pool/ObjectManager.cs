@@ -51,7 +51,7 @@ namespace TDFramework
             m_goPool = goPool;
             m_sceneGos = sceneGos;
         }
-        //资源在跳转场景是否需要清空
+        //参数3：资源在跳转场景是否需要清空
         public GameObject Instantiate(string path, bool setSceneObj = false, bool bClear = true)
         {
             uint crc = CrcHelper.StringToCRC32(path);

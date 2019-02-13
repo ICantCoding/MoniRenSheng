@@ -84,9 +84,9 @@ namespace TDFramework
                     m_loadFiles.Add(item.DirectoryPath); //文件夹中的资源是可能被动态加载的, 视频,音频,texture等资源
                 }
             }
-
-            //获取需要打包的Prefab的文件路径
-            string[] allPrefabGUIDAry = AssetDatabase.FindAssets("t:Prefab", abConfig.prefabABPathList.ToArray()); //得到GUID
+            
+            //获取需要打包的Prefab的文件路径, 得到GUID, GUID可以转Path
+            string[] allPrefabGUIDAry = AssetDatabase.FindAssets("t:Prefab", abConfig.prefabABPathList.ToArray());
             foreach (string guid in allPrefabGUIDAry)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -189,7 +189,7 @@ namespace TDFramework
                 bool isExists = false;
                 foreach (string assetBundleName in assetBundleNameAry)
                 {
-                    if (assetBundleName == fileInfo.Name)
+                    if (assetBundleName == fileInfo.Name) //AssetBundle包名和打包时标记名一致
                     {
                         isExists = true;
                     }

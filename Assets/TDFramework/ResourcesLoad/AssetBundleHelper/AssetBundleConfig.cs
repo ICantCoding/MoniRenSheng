@@ -18,7 +18,7 @@ namespace TDFramework
     public class ABBase
     {
         [XmlAttribute("Path")]
-        public string Path { get; set; }
+        public string Path { get; set; } //Asset/相对路径
         [XmlAttribute("Crc")]
         public uint Crc { get; set; } //Path所对应的Crc值
         [XmlAttribute("ABName")]
