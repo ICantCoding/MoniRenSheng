@@ -17,6 +17,7 @@ namespace TDFramework
 
     public class ABConfig : ScriptableObject
     {
+        //基于文件夹下所有单个文件进行打包, 针对的是Prefab, 该文件夹下Prefab的名字不能重复,必须保证名字的唯一性
         public List<string> prefabABPathList = new List<string>(); //所有的Prefab对应的AB包的路径
         public List<DirectoryAB> directoryABPathList = new List<DirectoryAB>(); //所有的文件夹对应的AB包路径
 
@@ -80,12 +81,12 @@ namespace TDFramework
                 {
                     m_directoryABDict.Add(item.ABName, item.DirectoryPath);
                     m_buildedFiles.Add(item.DirectoryPath); //文件夹是会被打包的，所以需要加入
-                    m_loadFiles.Add(item.DirectoryPath); //文件夹中的资源是可能被动态加载的
+                    m_loadFiles.Add(item.DirectoryPath); //文件夹中的资源是可能被动态加载的, 视频,音频,texture等资源
                 }
             }
 
             //获取需要打包的Prefab的文件路径
-            string[] allPrefabGUIDAry = AssetDatabase.FindAssets("t:Prefab", abConfig.prefabABPathList.ToArray());
+            string[] allPrefabGUIDAry = AssetDatabase.FindAssets("t:Prefab", abConfig.prefabABPathList.ToArray()); //得到GUID
             foreach (string guid in allPrefabGUIDAry)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);

@@ -379,6 +379,7 @@ namespace TDFramework
                         haveYield = true;
                     }
                 }
+                //下边的yield return null, 作用于没有异步加载资源请求时
                 if (!haveYield || System.DateTime.Now.Ticks - lastYieldTime > MAXLOADASSETTIME)
                 {
                     lastYieldTime = System.DateTime.Now.Ticks;

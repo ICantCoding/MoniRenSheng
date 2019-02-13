@@ -39,7 +39,7 @@ namespace TDFramework
         public Transform m_sceneGos;
         //对象池
         public Dictionary<uint, List<GameObjectItem>> m_gameObjectItemPoolDict = new Dictionary<uint, List<GameObjectItem>>();
-        //类对象池
+        //GameObjectItem的类对象池
         protected ClassObjectPool<GameObjectItem> m_gameObjectItemClassPool = ObjectManager.Instance.GetOrCreateClassObjectPool<GameObjectItem>(1000);
         //GameObjectItem的Guid为Key, GameObjectItem实例为对象的字典集合
         protected Dictionary<long, GameObjectItem> m_gameObjectItemDict = new Dictionary<long, GameObjectItem>();
@@ -68,7 +68,7 @@ namespace TDFramework
                     gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
                 }
             }
-            if (m_sceneGos)
+            if (setSceneObj)
             {
                 gameObjectItem.Obj.transform.SetParent(m_sceneGos, false);
             }
