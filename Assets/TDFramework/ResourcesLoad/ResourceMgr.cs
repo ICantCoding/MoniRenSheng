@@ -130,7 +130,7 @@ namespace TDFramework
             }
         }
         //同步加载资源,针对GameObject
-        public GameObjectItem LoadGameObject(string path, GameObjectItem gameObjectItem)
+        public GameObjectItem LoadGameObjectItem(string path, GameObjectItem gameObjectItem)
         {
             if (gameObjectItem == null)
             {
@@ -530,6 +530,39 @@ namespace TDFramework
                 Resources.UnloadUnusedAssets();
 #endif
             }
+        }
+        //GameObject实例化的时候,需要对资源引用计数+1
+        public int IncrementResourceRef(GameObjectItem gameObjectItem, int refCount = 1)
+        {
+            return gameObjectItem == null ? 0 : IncrementResourceRef(gameObjectItem.Crc, refCount);
+        }
+        //GameObject实例化的时候,需要对资源引用计数+1        
+        public int IncrementResourceRef(uint crc = 0, int refCount = 1)
+        {
+            ResourceItem item = null;
+            if(!AssetCacheDict.TryGetValue(crc, out item) || item == null)
+            {
+                return 0;
+            }
+            item.RefCount += refCount;
+            item.LastUseTime = Time.realtimeSinceStartup;
+            return item.RefCount;
+        }
+        //GameObject实例化的时候,需要对资源引用计数-1
+        public int DecrementResourceRef(GameObjectItem gameObjectItem, int refCount = 1)
+        {
+            return gameObjectItem == null ? 0 : DecrementResourceRef(gameObjectItem.Crc, refCount);
+        }
+        //GameObject实例化的时候,需要对资源引用计数-1
+        public int DecrementResourceRef(uint crc = 0, int refCount = 1)
+        {
+            ResourceItem item = null;
+            if(!AssetCacheDict.TryGetValue(crc, out item) || item == null)
+            {
+                return 0;
+            }
+            item.RefCount -= refCount;
+            return item.RefCount;
         }
         #endregion
     }

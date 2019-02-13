@@ -41,23 +41,21 @@ public class ResourceLoadTest : MonoBehaviour
 {
 
     public AudioSource audioSource;
-
+    private GameObject obj = null;
     void Start()
     {
-        
+        ObjectManager.Instance.InitGoPool(null, null);
     }
 
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.Alpha1))
         {
-            AudioClip clip = ResourceMgr.Instance.LoadAsset<AudioClip>("Assets/GameData/Happy.mp3");
-            audioSource.clip = clip;
-            audioSource.Play();
+            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/Robot_Blue.prefab");
         }
         if(Input.GetKeyDown(KeyCode.Alpha2))
         {
-            ResourceMgr.Instance.UnLoadAsset(audioSource.clip, true);
+            ObjectManager.Instance.ReleaseGameObjectItem(obj);
         }
     }
 }

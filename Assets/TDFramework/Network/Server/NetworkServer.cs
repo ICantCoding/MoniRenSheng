@@ -18,6 +18,8 @@ namespace TDFramework.Network
         private int m_tcpPort = 0;  //tcp连接服务器端口号
 
         private Thread m_thread = null;
+        //对Agent使用字典管理, Key为Agent的Id, Value为Agent对象
+        private Dictionary<uint, Agent> m_agentDict = new Dictionary<uint, Agent>();
         #endregion
 
         #region 构造函数
@@ -50,10 +52,9 @@ namespace TDFramework.Network
                 return false;
             }
             m_thread = new Thread(new ThreadStart(ThreadFunction));
-            m_thread.Start();
+            m_thread.Start(); //开启一个子线程专门用于监听客户端的连接
             return true;
         }
-        private Socket m_clientSocket = null;
         private void ThreadFunction()
         {
             while (true)
@@ -61,45 +62,42 @@ namespace TDFramework.Network
                 //确定是否有挂起的连接请求, Pending()返回true, 表示有从客户端来的连接请求
                 if (m_tcpListener != null && m_tcpListener.Pending())
                 {
-                    m_clientSocket = m_tcpListener.AcceptSocket();
-                    ReceiveData(m_clientSocket);
+                    Socket socket = m_tcpListener.AcceptSocket();
+                    AddAgent(socket);
                 }
                 Thread.Sleep(1);
             }
         }
-        private byte[] mTemp = new byte[0x2000];
-        private void ReceiveData(Socket socket)
-        {
-            if (socket != null && socket.Connected == true)
-            {
-                try
-                {
-                    socket.BeginReceive(mTemp, 0, mTemp.Length, SocketFlags.None, OnReceive, socket);
-                    Debug.Log("1111111111111");
-                }
-                catch (System.Exception e)
-                {
+        #endregion
 
+        #region 数据管理方法
+        private void AddAgent(Socket socket)
+        {
+            Agent agent = new Agent(socket);
+            lock(m_agentDict)
+            {
+                m_agentDict.Add(agent.Id, agent);
+            }
+            agent.StartReceive();
+        }
+        private void RemoveAgent(Agent agent)
+        {
+            if(m_agentDict.ContainsKey(agent.Id))
+            {
+                lock(m_agentDict)
+                {
+                    m_agentDict.Remove(agent.Id);
                 }
             }
         }
-        void OnReceive(IAsyncResult result) {
-            int bytes = 0;
-            try{
-                bytes = m_clientSocket.EndReceive(result);
-
-            }catch(Exception exception) {
-                Debug.LogError(exception.Message);
+        public Agent GetAgent(uint agentId)
+        {
+            Agent agent = null;
+            lock(m_agentDict)
+            {
+                m_agentDict.TryGetValue(agentId, out agent);
             }
-            if(bytes <= 0){
-                Debug.LogError("bytes "+ bytes);
-            }else {
-                uint num = (uint)bytes;
-                try{
-                    m_clientSocket.BeginReceive(mTemp, 0, mTemp.Length, SocketFlags.None, OnReceive, m_clientSocket);
-                }catch(Exception exception2) {
-                }
-            }
+            return agent;
         }
         #endregion
     }

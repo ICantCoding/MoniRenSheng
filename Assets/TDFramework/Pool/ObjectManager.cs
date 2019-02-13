@@ -40,7 +40,7 @@ namespace TDFramework
         //对象池
         public Dictionary<uint, List<GameObjectItem>> m_gameObjectItemPoolDict = new Dictionary<uint, List<GameObjectItem>>();
         //GameObjectItem的类对象池
-        protected ClassObjectPool<GameObjectItem> m_gameObjectItemClassPool = ObjectManager.Instance.GetOrCreateClassObjectPool<GameObjectItem>(1000);
+        protected ClassObjectPool<GameObjectItem> m_gameObjectItemClassPool = null;
         //GameObjectItem的Guid为Key, GameObjectItem实例为对象的字典集合
         protected Dictionary<long, GameObjectItem> m_gameObjectItemDict = new Dictionary<long, GameObjectItem>();
         #endregion
@@ -48,6 +48,7 @@ namespace TDFramework
         #region 方法
         public void InitGoPool(Transform goPool, Transform sceneGos)
         {
+            m_gameObjectItemClassPool = ObjectManager.Instance.GetOrCreateClassObjectPool<GameObjectItem>(1000);
             m_goPool = goPool;
             m_sceneGos = sceneGos;
         }
@@ -62,7 +63,7 @@ namespace TDFramework
                 gameObjectItem = m_gameObjectItemClassPool.Spawn(true);
                 gameObjectItem.Crc = crc;
                 gameObjectItem.Clear = bClear;
-                ResourceMgr.Instance.LoadGameObject(path, gameObjectItem);
+                ResourceMgr.Instance.LoadGameObjectItem(path, gameObjectItem);
                 if (gameObjectItem.ResourceItem.Obj != null)
                 {
                     gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
@@ -80,7 +81,8 @@ namespace TDFramework
             return gameObjectItem.Obj;
         }
         //卸载资源
-        public void ReleaseGameObjectItem(GameObject obj, int maxCacheCount = -1, bool destoryCache = false, bool recycleParent = true)
+        public void ReleaseGameObjectItem(GameObject obj, int maxCacheCount = -1,
+        bool destoryCache = false, bool recycleParent = true)
         {
             if (obj == null) return;
             GameObjectItem gameObjectItem = null;
@@ -98,17 +100,48 @@ namespace TDFramework
 #if UNITY_EDITOR
             obj.name += "(Recycle)";
 #endif
-            if(maxCacheCount == 0)
+            if (maxCacheCount == 0) //表示不缓存
             {
                 m_gameObjectItemDict.Remove(tempGuid);
                 GameObject.Destroy(gameObjectItem.Obj);
                 ResourceMgr.Instance.UnLoadGameObjectItem(gameObjectItem, destoryCache);
                 gameObjectItem.Reset();
                 m_gameObjectItemClassPool.Recycle(gameObjectItem);
-            }else
+            }
+            else
             {
                 //回收到对象池
-                
+                List<GameObjectItem> list = null;
+                if (!m_gameObjectItemPoolDict.TryGetValue(gameObjectItem.Crc, out list) || list == null)
+                {
+                    list = new List<GameObjectItem>();
+                    m_gameObjectItemPoolDict.Add(gameObjectItem.Crc, list);
+                }
+                if (gameObjectItem.Obj)
+                {
+                    if (recycleParent)
+                    {
+                        gameObjectItem.Obj.transform.SetParent(m_goPool);
+                    }
+                    else
+                    {
+                        gameObjectItem.Obj.SetActive(false);
+                    }
+                }
+                if (maxCacheCount < 0 || list.Count < maxCacheCount) //<0表示可以无限缓存, <maxCacheCount表示需要放入缓存
+                {
+                    list.Add(gameObjectItem);
+                    gameObjectItem.AlreadyRelease = true;
+                    ResourceMgr.Instance.DecrementResourceRef(gameObjectItem, 1);
+                }
+                else //不需要缓存GameObject到对象池
+                {
+                    m_gameObjectItemDict.Remove(tempGuid);
+                    GameObject.Destroy(gameObjectItem.Obj);
+                    ResourceMgr.Instance.UnLoadGameObjectItem(gameObjectItem);
+                    gameObjectItem.Reset();
+                    m_gameObjectItemClassPool.Recycle(gameObjectItem);
+                }
             }
         }
         //从对象池中获取对象
@@ -117,6 +150,7 @@ namespace TDFramework
             List<GameObjectItem> list = null;
             if (m_gameObjectItemPoolDict.TryGetValue(crc, out list) && list != null && list.Count > 0)
             {
+                ResourceMgr.Instance.IncrementResourceRef(crc, 1);
                 GameObjectItem gameObjectItem = list[0];
                 list.RemoveAt(0);
                 GameObject go = gameObjectItem.Obj;
