@@ -84,7 +84,7 @@ namespace TDFramework
                 }
             }
 
-            //获取需要打包的Prefab的文件路径
+            //获取需要打包的Prefab的文件路径, 得到GUID, GUID可以转Path
             string[] allPrefabGUIDAry = AssetDatabase.FindAssets("t:Prefab", abConfig.prefabABPathList.ToArray());
             foreach (string guid in allPrefabGUIDAry)
             {
@@ -188,7 +188,7 @@ namespace TDFramework
                 bool isExists = false;
                 foreach (string assetBundleName in assetBundleNameAry)
                 {
-                    if (assetBundleName == fileInfo.Name)
+                    if (assetBundleName == fileInfo.Name) //AssetBundle包名和打包时标记名一致
                     {
                         isExists = true;
                     }

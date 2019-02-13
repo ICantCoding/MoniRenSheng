@@ -12,6 +12,7 @@ namespace TDFramework
     //ResourceItem中包含AssetBundle
     public class ResourceItem
     {
+        ////////////////////////前四个属性通过读取依赖文件获取///////////////////////////
         //资源路径的crc
         public uint Crc = 0;
         //资源名字
@@ -20,8 +21,12 @@ namespace TDFramework
         public string ABName = string.Empty;
         //资源依赖的AssetBundle
         public List<string> DependABList = null;
+        //////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////通过LoadResourceItem来获取AssetBundle///////////////////
         //资源的加载完的AB包
         public AssetBundle Ab = null;
+        //////////////////////////////////////////////////////////////////////////////
 
         //资源对象本身,从AB包中加载出来
         public Object Obj = null;

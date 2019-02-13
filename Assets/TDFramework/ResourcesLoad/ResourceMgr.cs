@@ -95,7 +95,7 @@ namespace TDFramework
         private bool m_isInit = false;
         //最长连续卡着加载资源的时间,单位us
         private const long MAXLOADASSETTIME = 200000;
-        //用来缓存已经加载过的ResourceItem
+        //用来缓存已经加载过的ResourceItem, 在该缓存中的ResourceItem都是具有Object资源的ResourceItem对象
         public Dictionary<uint, ResourceItem> AssetCacheDict
         {
             get; set;
