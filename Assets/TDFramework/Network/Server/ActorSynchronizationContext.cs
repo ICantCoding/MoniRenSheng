@@ -9,6 +9,7 @@ namespace TDFramework.Network
     using System.Threading;
 
     //SynchronizationContext在通讯中充当传输者的角色，实现功能就是一个线程和另外一个线程的通讯
+    //用于保证所有的Task在同一个线程上执行
     public class ActorSynchronizationContext : SynchronizationContext
     {
         #region 字段
