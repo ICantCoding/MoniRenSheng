@@ -1,27 +1,21 @@
 ManifestFileVersion: 0
-CRC: 3749857895
+CRC: 2651250793
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
       Name: assetbundleconfig
       Dependencies: {}
     Info_1:
-      Name: materials
-      Dependencies: {}
-    Info_2:
-      Name: music
-      Dependencies: {}
-    Info_3:
       Name: darkdragon
       Dependencies: {}
-    Info_4:
+    Info_2:
       Name: robot_blue
-      Dependencies:
-        Dependency_0: robot_red
-    Info_5:
+      Dependencies: {}
+    Info_3:
       Name: robot_gray
       Dependencies:
-        Dependency_0: robot_red
-    Info_6:
+        Dependency_0: robot_blue
+    Info_4:
       Name: robot_red
-      Dependencies: {}
+      Dependencies:
+        Dependency_0: robot_blue

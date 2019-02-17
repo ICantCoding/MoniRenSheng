@@ -57,5 +57,17 @@ public class ResourceLoadTest : MonoBehaviour
         {
             ObjectManager.Instance.ReleaseGameObjectItem(obj);
         }
+        if(Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/Robot_Gray.prefab");
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/DarkDragon.prefab");
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/Robot_Red.prefab");
+        }
     }
 }

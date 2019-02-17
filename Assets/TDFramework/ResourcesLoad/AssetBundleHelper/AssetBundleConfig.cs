@@ -12,6 +12,23 @@ namespace TDFramework
     {
         [XmlElement("ABList")]
         public List<ABBase> ABList { get; set; }
+
+
+        public override string ToString(){
+            string content = "";
+            for(int i = 0; i < ABList.Count; i++){
+                ABBase abbase = ABList[i];
+                content += abbase.Path + ", ";
+                content += abbase.Crc + ", ";
+                content += abbase.ABName + ", ";
+                content += abbase.AssetName + ", ";
+                content += "Depend: ";
+                for(int j = 0; j < abbase.DependABList.Count; j++){
+                    content += abbase.DependABList[j] + ", ";
+                }
+            }
+            return content;
+        }
     }
 
     [System.Serializable]

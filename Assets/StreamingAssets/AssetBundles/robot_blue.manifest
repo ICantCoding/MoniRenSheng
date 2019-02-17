@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 3114572093
+CRC: 538068471
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: fca33d2c186048d2985e779e882a5cfa
+    Hash: 1f555c5370382fcb7d5963bf795c281f
   TypeTreeHash:
     serializedVersion: 2
     Hash: 9efa0356622aeb9d0887ac5c257bdecc
@@ -31,5 +31,7 @@ Assets:
 - Assets/Res/SciFi Robots/Materials/Ironman_Blue.mat
 - Assets/Res/SciFi Robots/Textures/Chr_FPS_D_Blue.TGA
 - Assets/Res/Prefab/Robot_Blue.prefab
-Dependencies:
-- C:/Users/ShanWazi/Desktop/MoniRenSheng/Assets/StreamingAssets/AssetBundles/robot_red
+- Assets/Res/SciFi Robots/Textures/Chr_FPS_02_M.TGA
+- Assets/Res/SciFi Robots/Model/Robot.FBX
+- Assets/Res/SciFi Robots/Textures/Chr_FPS_N.TGA
+Dependencies: []
