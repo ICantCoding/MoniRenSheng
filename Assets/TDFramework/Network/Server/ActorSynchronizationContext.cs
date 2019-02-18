@@ -31,28 +31,25 @@ namespace TDFramework.Network
             {
                 throw new ArgumentNullException("SendOrPostCallback");
             }
-            m_pendingQueue.Enqueue(() => d(state));
+            m_pendingQueue.Enqueue(() => d(state)); //将回调放入队列中
             if (Interlocked.Increment(ref m_pendingCount) == 1) //返回原子操作递增的结果值
             {
-                m_syncContext.Post(Consume, null);
+                m_syncContext.Post(Consume, null); //指定同步上下文的线程执行Consume方法， 在Consume方法中执行队列中的回调
             }
         }
         private void Consume(object state)
         {
-            var surroundContext = Current;
+            //Consume会在指定的m_syncContext上下文的线程中执行
+            var surroundContext = Current; //Current就是m_syncContext
             try
             {
                 SetSynchronizationContext(this);
                 do
                 {
                     Action a;
-                    m_pendingQueue.TryDequeue(out a);
+                    m_pendingQueue.TryDequeue(out a); //取出队列中所有方法，并顺序执行
                     a.Invoke();
                 } while (Interlocked.Decrement(ref m_pendingCount) > 0);
-            }
-            catch (System.Exception e)
-            {
-
             }
             finally
             {

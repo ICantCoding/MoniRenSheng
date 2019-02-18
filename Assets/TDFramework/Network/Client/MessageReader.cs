@@ -10,7 +10,7 @@ namespace TDFramework.Network
     {
         enum READ_STATE
         {
-            READ_STATE_FLAG = 0,
+            READ_STATE_FLAG = 0,                 //数据包标识0xcc
             READ_STATE_MSGLEN = 1,
             READ_STATE_FLOWID = 2,
             READ_STATE_MODULEID = 3,
@@ -62,7 +62,7 @@ namespace TDFramework.Network
                         stream.wpos += expectSize;
                         length -= expectSize;
                         flag = stream.ReadByte();
-                        // stream.Clear(); //不懂, 为何要清空stream的位置计数
+                        stream.Clear(); //不懂, 为何要清空stream的位置计数
                         state = READ_STATE.READ_STATE_MSGLEN;
                         expectSize = 4; //下个数据是报文总长度
                     }
@@ -83,7 +83,7 @@ namespace TDFramework.Network
                         stream.wpos += expectSize;
                         length -= expectSize;
                         msglen = stream.ReadUInt32();
-                        // stream.Clear();
+                        stream.Clear();
                         state = READ_STATE.READ_STATE_FLOWID;
                         expectSize = 4;
                     }
@@ -104,7 +104,7 @@ namespace TDFramework.Network
                         stream.wpos += expectSize;
                         length -= expectSize;
                         flowId = stream.ReadUInt32();
-                        // stream.Clear();
+                        stream.Clear();
                         state = READ_STATE.READ_STATE_MODULEID;
                         expectSize = 1;
                     }
@@ -125,7 +125,7 @@ namespace TDFramework.Network
                         stream.wpos += expectSize;
                         length -= expectSize;
                         moduleId = stream.ReadByte();
-                        //stream.Clear();
+                        stream.Clear();
                         state = READ_STATE.READ_STATE_MSGID;
                         expectSize = 2;
                     }
@@ -146,7 +146,7 @@ namespace TDFramework.Network
                         stream.wpos += expectSize;
                         length -= expectSize;
                         msgId = stream.ReadUInt16();
-                        //stream.Clear();
+                        stream.Clear();
                         state = READ_STATE.READ_STATE_RESPONSE_TIME;
                         expectSize = 4;
                     }
@@ -167,7 +167,7 @@ namespace TDFramework.Network
                         stream.wpos += expectSize;
                         length -= expectSize;
                         responseTime = stream.ReadUInt32();
-                        //stream.Clear();
+                        stream.Clear();
                         state = READ_STATE.READ_STATE_RESPONSE_FLAG;
                         expectSize = 2;
                     }
@@ -188,7 +188,7 @@ namespace TDFramework.Network
                         stream.wpos += expectSize;
                         length -= expectSize;
                         responseFlag = stream.ReadInt16();
-                        //stream.Clear();
+                        stream.Clear();
                         state = READ_STATE.READ_STATE_BODY;
                         expectSize = msglen - 4 - 1 - 2 - 4 - 2;
                     }
