@@ -62,7 +62,7 @@ namespace TDFramework
             m_loadFiles.Clear();
 
             //创建打包目的目录
-            if(!Directory.Exists(ABPathConfig.AssetBundleBuildTargetPath))
+            if (!Directory.Exists(ABPathConfig.AssetBundleBuildTargetPath))
             {
                 Directory.CreateDirectory(ABPathConfig.AssetBundleBuildTargetPath);
             }
@@ -84,7 +84,7 @@ namespace TDFramework
                     m_loadFiles.Add(item.DirectoryPath); //文件夹中的资源是可能被动态加载的, 视频,音频,texture等资源
                 }
             }
-            
+
             //获取需要打包的Prefab的文件路径, 得到GUID, GUID可以转Path
             string[] allPrefabGUIDAry = AssetDatabase.FindAssets("t:Prefab", abConfig.prefabABPathList.ToArray());
             foreach (string guid in allPrefabGUIDAry)
@@ -167,12 +167,16 @@ namespace TDFramework
         private static void MakeDependenceRelationShip()
         {
             string[] assetBundleNameAry = AssetDatabase.GetAllAssetBundleNames(); //得到所有的AssetBundle的名字
-            Dictionary<string, string> dict = new Dictionary<string, string>();
+            Dictionary<string, string> dict = new Dictionary<string, string>(); //记录需要被加载的资源
+            Dictionary<string, string> allDict = new Dictionary<string, string>(); //记录所有的资源
             for (int i = 0; i < assetBundleNameAry.Length; i++)
             {
                 string[] assetBundleAllFiles = AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleNameAry[i]); //得到某个AssetBundle下的所有被标记的文件
                 for (int j = 0; j < assetBundleAllFiles.Length; j++)
                 {
+                    if(assetBundleAllFiles[j].EndsWith(".cs") == false){
+                        allDict.Add(assetBundleAllFiles[j], assetBundleNameAry[i]);
+                    }
                     if (assetBundleAllFiles[j].EndsWith(".cs") == true || CanBeLoadByDynamic(assetBundleAllFiles[j]) == false) //生成依赖文件，我们只生成那些有可能会被实例化的资源，那些不可能被实例化的资源不需要写入依赖文件中
                     {
                         continue;
@@ -219,12 +223,12 @@ namespace TDFramework
                     if (tempPath == path || path.EndsWith(".cs")) //排除对本身文件和.cs脚本文件
                         continue;
                     string abName = "";
-                    if (dict.TryGetValue(tempPath, out abName))
-                    {
-                        if (abName == dict[path]) //排除对本身AB包的依赖
-                            continue;
-                        if (!abBase.DependABList.Contains(abName))
+                    if(allDict.TryGetValue(tempPath, out abName)){
+                        if(abName == allDict[path])
                         {
+                            continue;
+                        }
+                        if(!abBase.DependABList.Contains(abName)){
                             abBase.DependABList.Add(abName);
                         }
                     }
@@ -267,9 +271,9 @@ namespace TDFramework
         //用于判断参数文件是否已经被标记进打包文件中了，true表示已经被标记了，false表示还没有被标记，需要标记该文件
         private static bool BuildedFilesContainFile(string filePath)
         {
-            foreach (string directoryPath in m_directoryABDict.Values)
+            foreach (string path in m_buildedFiles)
             {
-                if (filePath == directoryPath || (filePath.Contains(directoryPath) && (filePath.Replace(directoryPath, "")[0] == '/')))
+                if (filePath == path || (filePath.Contains(path) && (filePath.Replace(path, "")[0] == '/')))
                 {
                     return true;
                 }
@@ -298,7 +302,7 @@ namespace TDFramework
                 List<string> list = new List<string>();
                 Util.Recursive(ABPathConfig.AssetBundleBuildTargetPath, ref list);
                 string outPath = Util.DeviceResPath() + AppConfig.Md5FilePath;
-                if(File.Exists(outPath)) File.Delete(outPath);
+                if (File.Exists(outPath)) File.Delete(outPath);
                 FileStream fs = new FileStream(outPath, FileMode.CreateNew);
                 StreamWriter sw = new StreamWriter(fs);
                 for (int i = 0; i < list.Count; i++)

@@ -89,7 +89,7 @@ namespace TDFramework
 
     public class ResourceMgr : Singleton<ResourceMgr>
     {
-        public bool m_loadFromAssetBundle = false; //是否从AssetBundle中加载资源
+        public bool m_loadFromAssetBundle = true; //是否从AssetBundle中加载资源
 
         #region 字段和属性
         private bool m_isInit = false;

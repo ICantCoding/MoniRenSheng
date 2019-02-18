@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 79485154
+CRC: 2456561606
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: f1eff6685dea28f754e4f5a0643f4291
+    Hash: ba5876182b70f13009842ca18c2df020
   TypeTreeHash:
     serializedVersion: 2
     Hash: 9efa0356622aeb9d0887ac5c257bdecc
@@ -32,4 +32,4 @@ Assets:
 - Assets/Res/Prefab/Robot_Gray.prefab
 - Assets/Res/SciFi Robots/Materials/Ironman_Gray.mat
 Dependencies:
-- C:/Users/ShanWazi/Desktop/MoniRenSheng/Assets/StreamingAssets/AssetBundles/robot_red
+- C:/Users/ShanWazi/Desktop/MoniRenSheng/Assets/StreamingAssets/AssetBundles/robot_blue

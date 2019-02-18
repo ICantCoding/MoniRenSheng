@@ -4,10 +4,11 @@
   <ABList Path="Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.bytes" Crc="2390658496" ABName="assetbundleconfig" AssetName="AssetBundleDependenceConfig.bytes" />
   <ABList Path="Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config/AssetBundleDependenceConfig.xml" Crc="2445625552" ABName="assetbundleconfig" AssetName="AssetBundleDependenceConfig.xml" />
   <ABList Path="Assets/Res/Prefab/DarkDragon.prefab" Crc="555725018" ABName="darkdragon" AssetName="DarkDragon.prefab" />
-  <ABList Path="Assets/Res/Materials/Blue.mat" Crc="1177794436" ABName="materials" AssetName="Blue.mat" />
-  <ABList Path="Assets/Res/Materials/Red.mat" Crc="3079911819" ABName="materials" AssetName="Red.mat" />
-  <ABList Path="Assets/Res/Music/Happy.mp3" Crc="3954969128" ABName="music" AssetName="Happy.mp3" />
   <ABList Path="Assets/Res/Prefab/Robot_Blue.prefab" Crc="4006316529" ABName="robot_blue" AssetName="Robot_Blue.prefab" />
-  <ABList Path="Assets/Res/Prefab/Robot_Gray.prefab" Crc="2093196273" ABName="robot_gray" AssetName="Robot_Gray.prefab" />
-  <ABList Path="Assets/Res/Prefab/Robot_Red.prefab" Crc="3793135142" ABName="robot_red" AssetName="Robot_Red.prefab" />
+  <ABList Path="Assets/Res/Prefab/Robot_Gray.prefab" Crc="2093196273" ABName="robot_gray" AssetName="Robot_Gray.prefab">
+    <DependABList>robot_blue</DependABList>
+  </ABList>
+  <ABList Path="Assets/Res/Prefab/Robot_Red.prefab" Crc="3793135142" ABName="robot_red" AssetName="Robot_Red.prefab">
+    <DependABList>robot_blue</DependABList>
+  </ABList>
 </AssetBundleConfig>

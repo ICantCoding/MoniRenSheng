@@ -17,7 +17,3 @@ MonoBehaviour:
   directoryABPathList:
   - ABName: assetbundleconfig
     DirectoryPath: Assets/TDFramework/ResourcesLoad/AssetBundleHelper/Config
-  - ABName: materials
-    DirectoryPath: Assets/Res/Materials
-  - ABName: music
-    DirectoryPath: Assets/Res/Music
