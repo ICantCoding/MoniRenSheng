@@ -41,6 +41,13 @@ namespace TDFramework
     using TDFramework.TDStruct;
     using Utils;
 
+    //异步加载资源回调, 该代理对ResourceObj和GameObj异步加载有效
+    public delegate void OnAsyncResourceObjFinished(string path, Object obj, object param1 = null,
+     object param2 = null, object param3 = null);
+    //异步加载游戏对象回调
+    public delegate void OnAsyncGameObjFinished(string path, GameObjectItem gameObjectItem,
+     object param1 = null, object param2 = null, object param3 = null);
+
     //异步加载资源的优先等级
     public enum LoadAssetPriority
     {
@@ -70,8 +77,11 @@ namespace TDFramework
 
     public class AsyncCallBack
     {
-        //加载完成的回调
-        public OnAsyncObjFinished m_dealFinished = null;
+        //加载完成的回调, 针对资源,非GameObject
+        public OnAsyncResourceObjFinished m_resourceObjDealFinished = null;
+        //加载完成的回调, 针对游戏对象, 非资源
+        public OnAsyncGameObjFinished m_gameObjDealFinished = null;
+        public GameObjectItem m_gameObjectItem = null; //针对异步加载GameObj时的中间GameObjectItem数据
         //回调参数
         public object m_param1 = null;
         public object m_param2 = null;
@@ -79,13 +89,12 @@ namespace TDFramework
 
         public void Reset()
         {
-            m_dealFinished = null;
+            m_resourceObjDealFinished = null;
+            m_gameObjDealFinished = null;
             m_param1 = m_param2 = m_param3 = null;
+            m_gameObjectItem = null;
         }
     }
-
-    public delegate void OnAsyncObjFinished(string path, Object obj, object param1 = null,
-     object param2 = null, object param3 = null);
 
     public class ResourceMgr : Singleton<ResourceMgr>
     {
@@ -145,7 +154,7 @@ namespace TDFramework
             }
             Object obj = null;
 #if UNITY_EDITOR
-            if(!m_loadFromAssetBundle)
+            if (!m_loadFromAssetBundle)
             {
                 resouceItem = AssetBundleManager.Instance.FindResourceItem(crc);
                 if (resouceItem.Obj != null)
@@ -181,7 +190,7 @@ namespace TDFramework
         //卸载资源,针对GameObject
         public void UnLoadGameObjectItem(GameObjectItem gameObjectItem, bool destoryCache = false)
         {
-            if(gameObjectItem == null) return;
+            if (gameObjectItem == null) return;
             UnLoadAsset(gameObjectItem.ResourceItem.Obj, destoryCache);
         }
         //同步资源加载,仅加载不需要实例化的资源(纹理图片,音频,视频,Prefab等)
@@ -268,7 +277,7 @@ namespace TDFramework
             DestroyResourceItem(item, destroyObj);
         }
         //异步加载资源, 仅仅是不需要实例化的资源,音频,图片等
-        public void AsyncLoadAsset<T>(string path, OnAsyncObjFinished dealFinished,
+        public void AsyncLoadAsset<T>(string path, OnAsyncResourceObjFinished dealFinished,
          LoadAssetPriority priority, object param1 = null,
          object param2 = null, object param3 = null, uint crc = 0) where T : UnityEngine.Object
         {
@@ -297,10 +306,39 @@ namespace TDFramework
                 m_loadingAssetList[(int)priority].Add(para);
             }
             AsyncCallBack callback = m_asyncCallBackPool.Spawn(true);
-            callback.m_dealFinished = dealFinished;
+            callback.m_resourceObjDealFinished = dealFinished;
             callback.m_param1 = param1;
             callback.m_param2 = param2;
             callback.m_param3 = param3;
+            para.m_callbackList.Add(callback);
+        }
+        public void AsyncLoadGameObjectItem(string path, GameObjectItem gameObjectItem, OnAsyncGameObjFinished dealFinished,
+         LoadAssetPriority priority)
+        {
+            ResourceItem item = GetAssetFromAssetCache(gameObjectItem.Crc);
+            if (item != null)
+            {
+                gameObjectItem.ResourceItem = item;
+                if (dealFinished != null)
+                {
+                    dealFinished(path, gameObjectItem);
+                }
+                return;
+            }
+            //判断是否在加载中
+            AsyncLoadAssetParam para = null;
+            if (!m_loadingAssetDict.TryGetValue(gameObjectItem.Crc, out para) || para == null)
+            {
+                para = m_asyncLoadAssetParamPool.Spawn(true);
+                para.m_crc = gameObjectItem.Crc;
+                para.m_path = path;
+                para.m_priority = priority;
+                m_loadingAssetDict.Add(gameObjectItem.Crc, para);
+                m_loadingAssetList[(int)priority].Add(para);
+            }
+            AsyncCallBack callback = m_asyncCallBackPool.Spawn(true);
+            callback.m_gameObjDealFinished = dealFinished;
+            callback.m_gameObjectItem = gameObjectItem;
             para.m_callbackList.Add(callback);
         }
         //异步加载资源协程
@@ -358,10 +396,17 @@ namespace TDFramework
                     for (int j = 0; j < callbackList.Count; j++)
                     {
                         AsyncCallBack callback = callbackList[j];
-                        if (callback != null && callback.m_dealFinished != null)
+                        if(callback != null && callback.m_gameObjDealFinished != null)
                         {
-                            callback.m_dealFinished(param.m_path, obj, callback.m_param1, callback.m_param2, callback.m_param3);
-                            callback.m_dealFinished = null;
+                            GameObjectItem gameObjectItem = callback.m_gameObjectItem;
+                            gameObjectItem.ResourceItem = item;
+                            callback.m_gameObjDealFinished(param.m_path, gameObjectItem, gameObjectItem.Param1, gameObjectItem.Param2, gameObjectItem.Param3);
+                            callback.m_gameObjDealFinished = null;
+                        }
+                        if (callback != null && callback.m_resourceObjDealFinished != null)
+                        {
+                            callback.m_resourceObjDealFinished(param.m_path, obj, callback.m_param1, callback.m_param2, callback.m_param3);
+                            callback.m_resourceObjDealFinished = null;
                         }
                         callback.Reset();
                         m_asyncCallBackPool.Recycle(callback);
@@ -540,7 +585,7 @@ namespace TDFramework
         public int IncrementResourceRef(uint crc = 0, int refCount = 1)
         {
             ResourceItem item = null;
-            if(!AssetCacheDict.TryGetValue(crc, out item) || item == null)
+            if (!AssetCacheDict.TryGetValue(crc, out item) || item == null)
             {
                 return 0;
             }
@@ -557,7 +602,7 @@ namespace TDFramework
         public int DecrementResourceRef(uint crc = 0, int refCount = 1)
         {
             ResourceItem item = null;
-            if(!AssetCacheDict.TryGetValue(crc, out item) || item == null)
+            if (!AssetCacheDict.TryGetValue(crc, out item) || item == null)
             {
                 return 0;
             }

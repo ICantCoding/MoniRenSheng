@@ -72,6 +72,13 @@ namespace TDFramework
         public bool Clear = true; //跳转场景是否删除该资源
         public long Guid = 0; //存储Guid
         public bool AlreadyRelease = false; //是否已经放回到对象池
+        public bool SetSceneParent = false; //是否放到场景下边
+        //游戏对象资源加载完成回调
+        public OnAsyncResourceObjFinished DealFinishCallback = null;
+        //异步参数
+        public object Param1 = null;
+        public object Param2 = null;
+        public object Param3 = null;
 
         public void Reset()
         {
@@ -81,6 +88,9 @@ namespace TDFramework
             Guid = 0;
             ResourceItem = null;
             AlreadyRelease = false;
+            SetSceneParent = false;
+            DealFinishCallback = null;
+            Param1 = Param2 = Param3 = null;
         }
     }
 
