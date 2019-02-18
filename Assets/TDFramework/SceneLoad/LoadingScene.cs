@@ -5,7 +5,6 @@ namespace TDFramework
     using UnityEngine;
     using UnityEngine.UI;
     using UnityEngine.SceneManagement;
-    using Utils;
 
     public class LoadingScene : MonoBehaviour
     {
