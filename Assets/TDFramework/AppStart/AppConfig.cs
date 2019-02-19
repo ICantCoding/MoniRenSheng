@@ -50,5 +50,16 @@ namespace TDFramework
 
     }
 
+    public class GameLayers
+    {
+        public const string UI2D_Layer = "UI2D_Layer";
+        public const string UI3D_Layer = "UI3D_Layer";
+    }
+
+    public class GameTags
+    {
+
+    }
+
 
 }
