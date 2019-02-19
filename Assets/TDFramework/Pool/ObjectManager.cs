@@ -80,6 +80,70 @@ namespace TDFramework
             }
             return gameObjectItem.Obj;
         }
+        //GameObject异步加载资源
+        public void InstantiateAsync(string path, OnAsyncResourceObjFinished dealFinish, LoadAssetPriority priority,
+         bool setSceneObject = false, object param1 = null, object param2 = null, object param3 = null,
+         bool bClear = true)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+            uint crc = CrcHelper.StringToCRC32(path);
+            GameObjectItem gameObjectItem = GetGameObjectItemFromPool(crc);
+            if (gameObjectItem != null)
+            {
+                if (setSceneObject)
+                {
+                    gameObjectItem.Obj.transform.SetParent(m_sceneGos, false);
+                }
+                if (dealFinish != null)
+                {
+                    dealFinish(path, gameObjectItem.Obj, param1, param2, param3);
+                }
+                return;
+            }
+            gameObjectItem = m_gameObjectItemClassPool.Spawn(true);
+            gameObjectItem.Crc = crc;
+            gameObjectItem.SetSceneParent = setSceneObject;
+            gameObjectItem.Clear = bClear;
+            gameObjectItem.DealFinishCallback = dealFinish;
+            gameObjectItem.Param1 = param1;
+            gameObjectItem.Param2 = param2;
+            gameObjectItem.Param3 = param3;
+            //调用ResourceManager异步加载接口
+            ResourceMgr.Instance.AsyncLoadGameObjectItem(path, gameObjectItem, OnAsyncLoadGameObjectFinish, priority);
+        }
+        //GameObject异步加载资源ResourceItem成功后的回调
+        private void OnAsyncLoadGameObjectFinish(string path, GameObjectItem gameObjectItem,
+         object param1 = null, object param2 = null, object param3 = null)
+        {
+            if (gameObjectItem == null) return;
+            if (gameObjectItem.ResourceItem.Obj == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError("异步资源加载的资源为空: " + path);
+#endif
+            }
+            else
+            {
+                gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
+            }
+            if(gameObjectItem.Obj != null && gameObjectItem.SetSceneParent)
+            {
+                gameObjectItem.Obj.transform.SetParent(m_sceneGos, false);
+            }
+            if(gameObjectItem.DealFinishCallback != null)
+            {
+                int guid = gameObjectItem.Obj.GetInstanceID();
+                if(!m_gameObjectItemDict.ContainsKey(guid))
+                {
+                    m_gameObjectItemDict.Add(guid, gameObjectItem);
+                }
+                gameObjectItem.DealFinishCallback(path, gameObjectItem.Obj, 
+                 gameObjectItem.Param1, gameObjectItem.Param2, gameObjectItem.Param3);
+            }
+        }
         //卸载资源
         public void ReleaseGameObjectItem(GameObject obj, int maxCacheCount = -1,
         bool destoryCache = false, bool recycleParent = true)

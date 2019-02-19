@@ -44,6 +44,7 @@ public class ResourceLoadTest : MonoBehaviour
     private GameObject obj = null;
     void Start()
     {
+        ResourceMgr.Instance.Init(this);
         ObjectManager.Instance.InitGoPool(null, null);
     }
 
@@ -51,23 +52,16 @@ public class ResourceLoadTest : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Alpha1))
         {
-            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/Robot_Blue.prefab");
+            ObjectManager.Instance.InstantiateAsync("Assets/Res/Prefab/Robot_Blue.prefab", OnXX, LoadAssetPriority.HIGH);
         }
         if(Input.GetKeyDown(KeyCode.Alpha2))
         {
-            ObjectManager.Instance.ReleaseGameObjectItem(obj);
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/Robot_Gray.prefab");
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/DarkDragon.prefab");
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            obj = ObjectManager.Instance.Instantiate("Assets/Res/Prefab/Robot_Red.prefab");
+            ObjectManager.Instance.ReleaseGameObjectItem(obj, 0, false, false);
         }
     }
+    private void OnXX(string path, Object objx, object param1 = null,
+     object param2 = null, object param3 = null)
+     {
+         obj = objx as GameObject;
+     }
 }
