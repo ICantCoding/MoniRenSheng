@@ -12,7 +12,7 @@ namespace PureMVC.Patterns.Observer
         protected IFacade Facade
         {
             get {
-                return Patterns.Facade.Facade.GetInstance(() => new Facade.Facade());
+                return Patterns.Facade.Facade.Instance;
             }
         }
     }

@@ -17,13 +17,16 @@ namespace PureMVC.Patterns.Facade
 
         #region 单例
         protected static IFacade instance;
-        public static IFacade GetInstance(Func<IFacade> facadeFunc)
+        public static IFacade Instance
         {
-            if (instance == null)
+            get
             {
-                instance = facadeFunc();
+                if (instance == null)
+                {
+                    instance = new Facade();
+                }
+                return instance;
             }
-            return instance;
         }
         #endregion
 
