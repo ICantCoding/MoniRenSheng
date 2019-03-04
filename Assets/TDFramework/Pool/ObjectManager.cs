@@ -52,6 +52,23 @@ namespace TDFramework
             m_goPool = goPool;
             m_sceneGos = sceneGos;
         }
+        //预加载GameObject对象, 路径, 预加载个数, 跳场景是否清除
+        public void Preload(string path, int count = -1, bool clear = false)
+        {
+            List<GameObject> tempGameObjectList = new List<GameObject>();
+            for(int i = 0; i < count; i++)
+            {
+                GameObject obj = Instantiate(path, false, clear);
+                tempGameObjectList.Add(obj);
+            }
+            for(int i = 0; i < count; i++)
+            {
+                GameObject obj = tempGameObjectList[i];
+                ReleaseGameObjectItem(obj);
+                obj = null;
+            }
+            tempGameObjectList.Clear();
+        }
         //参数3：资源在跳转场景是否需要清空
         public GameObject Instantiate(string path, bool setSceneObj = false, bool bClear = true)
         {
