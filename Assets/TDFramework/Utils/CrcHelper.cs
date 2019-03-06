@@ -1,6 +1,6 @@
 
 
-namespace TDFramework.Utils
+namespace TDFramework
 {
     using System;
     using System.Collections.Generic;

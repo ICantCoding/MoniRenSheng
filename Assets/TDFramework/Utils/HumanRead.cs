@@ -1,5 +1,5 @@
 
-namespace TDFramework.Utils
+namespace TDFramework
 {
     using System;
     

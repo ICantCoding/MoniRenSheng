@@ -6,10 +6,13 @@ namespace TDFramework
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net;
+    using System.Net.Sockets;
     using UnityEngine;
 
     public class Util
     {
+        #region 查找子物体相关
         //查找子物体
         public static T FindObject<T>(Transform parent, string name) where T : UnityEngine.Object
         {
@@ -36,6 +39,22 @@ namespace TDFramework
             }
             return null;
         }
+        #endregion
+
+        #region 销毁物体 相关
+        public static void DestroyAllChildObject(Transform parent, float delayTime = 0.0f)
+        {
+            if (parent == null) return;
+            int childCount = parent.childCount;
+            for (int i = 0; i < childCount; i++)
+            {
+                Transform childTrans = parent.GetChild(i);
+                UnityEngine.GameObject.Destroy(childTrans.gameObject, delayTime);
+            }
+        }
+        #endregion
+
+        #region 单例 相关
         //创建单例
         public static T GetInstance<T>(ref T instance, string name, bool isDontDestroy = true) where T : UnityEngine.Object
         {
@@ -50,6 +69,9 @@ namespace TDFramework
             instance = go.GetComponent(typeof(T)) as T;
             return instance;
         }
+        #endregion
+
+        #region 平台路径 相关
         //各平台下路径
         public static string DeviceResPath()
         {
@@ -64,6 +86,9 @@ namespace TDFramework
             }
             return string.Format("{0}/", Application.dataPath);
         }
+        #endregion
+
+        #region 文件目录相关
         //获取文件目录下,所有的文件路径
         public static void Recursive(string path, ref List<string> list)
         {
@@ -81,5 +106,30 @@ namespace TDFramework
                 }
             }
         }
+        #endregion
+
+        #region 获取本地局域网IP地址
+        public static string GetIpAddress()
+        {
+            try
+            {
+                string HostName = Dns.GetHostName();
+                IPHostEntry IpEntry = Dns.GetHostEntry(HostName);
+                for (int i = 0; i < IpEntry.AddressList.Length; i++)
+                {
+                    if (IpEntry.AddressList[i].AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        return IpEntry.AddressList[i].ToString();
+                    }
+                }
+                return "127.0.0.1";
+            }
+            catch (Exception exception)
+            {
+                Debug.Log("获取本地IP地址失败, Reason: " + exception.Message);
+                return "127.0.0.1";
+            }
+        }
+        #endregion
     }
 }
