@@ -169,6 +169,7 @@ namespace TDFramework
                 if (gameObjectItem.ResourceItem.Obj != null)
                 {
                     gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
+                    gameObjectItem.OfflineData = gameObjectItem.Obj.GetComponent<OfflineData>();
                 }
             }
             if (setSceneObj)
@@ -232,6 +233,7 @@ namespace TDFramework
             else
             {
                 gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
+                gameObjectItem.OfflineData = gameObjectItem.Obj.GetComponent<OfflineData>();
             }
             //加载完成， 就从正在加载的异步中移除
             if(m_asyncGameObjectItemDict.ContainsKey(gameObjectItem.Guid))
@@ -329,6 +331,11 @@ namespace TDFramework
                 GameObject go = gameObjectItem.Obj;
                 if (!System.Object.ReferenceEquals(go, null))
                 {
+                    //离线数据还原
+                    if(!System.Object.ReferenceEquals(gameObjectItem.OfflineData, null))
+                    {
+                        gameObjectItem.OfflineData.ResetProperty();
+                    }
                     gameObjectItem.AlreadyRelease = false;
 #if UNITY_EDITOR
                     if (go.name.EndsWith("(Recycle)"))
@@ -340,6 +347,17 @@ namespace TDFramework
                 return gameObjectItem;
             }
             return null;
+        }
+        //获取离线数据OfflineData
+        public OfflineData FindOfflineData(GameObject obj)
+        {
+            OfflineData offlineData = null;
+            GameObjectItem item = null;
+            if(m_gameObjectItemDict.TryGetValue(obj.GetInstanceID(), out item) && item != null)
+            {
+                offlineData = item.OfflineData;
+            }
+            return offlineData;
         }
         #endregion
         #endregion

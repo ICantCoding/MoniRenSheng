@@ -43,7 +43,8 @@ namespace PureMVC.Core
         }
         public virtual void ExecuteCommand(INotification notification)
         {
-            if (commandMap.TryGetValue(notification.Name, out Func<ICommand> commandFunc))
+            Func<ICommand> commandFunc = null;
+            if (commandMap.TryGetValue(notification.Name, out commandFunc))
             {
                 ICommand commandInstance = commandFunc();
                 commandInstance.Execute(notification);
@@ -51,7 +52,8 @@ namespace PureMVC.Core
         }
         public virtual void RegisterCommand(string notificationName, Func<ICommand> commandFunc)
         {
-            if (commandMap.TryGetValue(notificationName, out Func<ICommand> _) == false)
+            Func<ICommand> _ = null;
+            if (commandMap.TryGetValue(notificationName, out _) == false)
             {
                 view.RegisterObserver(notificationName, new Observer(ExecuteCommand, this)); //添加监听者
             }
@@ -59,7 +61,8 @@ namespace PureMVC.Core
         }
         public virtual void RemoveCommand(string notificationName)
         {
-            if (commandMap.TryRemove(notificationName, out Func<ICommand> _))
+            Func<ICommand> _ = null;
+            if (commandMap.TryRemove(notificationName, out _))
             {
                 view.RemoveObserver(notificationName, this);
             }

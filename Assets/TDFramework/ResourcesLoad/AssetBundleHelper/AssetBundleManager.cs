@@ -73,6 +73,8 @@ namespace TDFramework
         public long Guid = 0; //存储Guid
         public bool AlreadyRelease = false; //是否已经放回到对象池
         public bool SetSceneParent = false; //是否放到场景下边
+
+        public OfflineData OfflineData = null;
         //游戏对象资源加载完成回调
         public OnAsyncResourceObjFinished DealFinishCallback = null;
         //异步参数
@@ -89,6 +91,7 @@ namespace TDFramework
             ResourceItem = null;
             AlreadyRelease = false;
             SetSceneParent = false;
+            OfflineData = null;
             DealFinishCallback = null;
             Param1 = Param2 = Param3 = null;
         }

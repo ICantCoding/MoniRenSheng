@@ -45,11 +45,13 @@ namespace PureMVC.Core
         }
         public virtual IProxy RetrieveProxy(string proxyName)
         {
-            return proxyMap.TryGetValue(proxyName, out IProxy proxy) ? proxy : null;
+            IProxy proxy = null;
+            return proxyMap.TryGetValue(proxyName, out proxy) ? proxy : null;
         }
         public virtual IProxy RemoveProxy(string proxyName)
         {
-            if (proxyMap.TryRemove(proxyName, out IProxy proxy))
+            IProxy proxy = null;
+            if (proxyMap.TryRemove(proxyName, out proxy))
             {
                 proxy.OnRemove();
             }

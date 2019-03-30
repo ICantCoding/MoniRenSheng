@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using PureMVC.Interfaces;
 using PureMVC.Patterns.Observer;
+using PureMVC.Patterns.Mediator;
 
 namespace PureMVC.Core
 {
@@ -44,7 +45,8 @@ namespace PureMVC.Core
         }
         public virtual void RegisterObserver(string notificationName, IObserver observer) //注册消息执行者
         {
-            if (observerMap.TryGetValue(notificationName, out IList<IObserver> observers))
+            IList<IObserver> observers = null;
+            if (observerMap.TryGetValue(notificationName, out observers))
             {
                 observers.Add(observer);
             }
@@ -55,7 +57,8 @@ namespace PureMVC.Core
         }
         public virtual void NotifyObservers(INotification notification) //接收到消息具体进行消息的操作执行
         {
-            if (observerMap.TryGetValue(notification.Name, out IList<IObserver> observers_ref))
+            IList<IObserver> observers_ref = null;
+            if (observerMap.TryGetValue(notification.Name, out observers_ref))
             {
                 var observers = new List<IObserver>(observers_ref);
                 foreach (IObserver observer in observers)
@@ -66,7 +69,8 @@ namespace PureMVC.Core
         }
         public virtual void RemoveObserver(string notificationName, object notifyContext)
         {
-            if (observerMap.TryGetValue(notificationName, out IList<IObserver> observers))
+            IList<IObserver> observers = null;
+            if (observerMap.TryGetValue(notificationName, out observers))
             {
                 for (int i = 0; i < observers.Count; i++)
                 {
@@ -76,8 +80,9 @@ namespace PureMVC.Core
                         break;
                     }
                 }
+                IList<IObserver> _ = null;
                 if (observers.Count == 0)
-                    observerMap.TryRemove(notificationName, out IList<IObserver> _);
+                    observerMap.TryRemove(notificationName, out _);
             }
         }
         public virtual void RegisterMediator(IMediator mediator) 
@@ -98,11 +103,13 @@ namespace PureMVC.Core
         }
         public virtual IMediator RetrieveMediator(string mediatorName)
         {
-            return mediatorMap.TryGetValue(mediatorName, out IMediator mediator) ? mediator : null;
+            IMediator mediator = null;
+            return mediatorMap.TryGetValue(mediatorName, out mediator) ? mediator : null;
         }
         public virtual IMediator RemoveMediator(string mediatorName)
         {
-            if (mediatorMap.TryRemove(mediatorName, out IMediator mediator))
+            IMediator mediator = null;
+            if (mediatorMap.TryRemove(mediatorName, out mediator))
             {
                 string[] interests = mediator.ListNotificationInterests();
                 for (int i = 0; i < interests.Length; i++)
