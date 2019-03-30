@@ -40,6 +40,7 @@ namespace TDFramework
     using UnityEngine;
     using TDFramework.TDStruct;
     using Utils;
+    using System.Threading;
 
     //异步加载资源回调, 该代理对ResourceObj和GameObj异步加载有效
     public delegate void OnAsyncResourceObjFinished(string path, Object obj, object param1 = null,
@@ -495,9 +496,42 @@ namespace TDFramework
             tempList.Clear();
             tempList = null;
         }
+        //取消异步加载
+        public bool CancelAsyncLoad(GameObjectItem item)
+        {
+            AsyncLoadAssetParam param = null;
+            if(m_loadingAssetDict.TryGetValue(item.Crc, out param) && param != null && m_loadingAssetList[(int)param.m_priority].Contains(param))
+            {
+                for(int i = param.m_callbackList.Count - 1; i >= 0; --i)
+                {
+                    AsyncCallBack callback = param.m_callbackList[i];
+                    if(callback != null && item == callback.m_gameObjectItem)
+                    {
+                        callback.Reset();
+                        m_asyncCallBackPool.Recycle(callback);
+                        param.m_callbackList.Remove(callback);
+                    }
+                }
+                if(param.m_callbackList.Count <= 0)
+                {
+                    param.Reset();
+                    m_loadingAssetList[(int)param.m_priority].Remove(param);
+                    m_asyncLoadAssetParamPool.Recycle(param);
+                    m_loadingAssetDict.Remove(item.Crc);
+                    return true;
+                }
+            }
+            return false;
+        }
         #endregion
 
         #region 私有辅助方法
+        //创建唯一的guid
+        private long m_guid = 0;
+        public long CreateGuid()
+        {
+            return Interlocked.Increment(ref m_guid);
+        }
         //从缓存获取资源
         private ResourceItem GetAssetFromAssetCache(uint crc, int addRefcount = 1)
         {
@@ -567,6 +601,7 @@ namespace TDFramework
                 return;
             }
             AssetBundleManager.Instance.UnLoadResourceItem(item);
+            ObjectManager.Instance.ClearPoolObject(item.Crc);
             if (item.Obj != null)
             {
                 item.Obj = null;

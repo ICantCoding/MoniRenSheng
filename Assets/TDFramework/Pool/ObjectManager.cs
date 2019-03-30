@@ -8,9 +8,9 @@ namespace TDFramework
     using UnityEngine;
     using TDFramework.Utils;
 
+
     public class ObjectManager : Singleton<ObjectManager>
     {
-
         #region 类对象池相关
         #region 字段和属性
         private Dictionary<Type, object> m_classObjectPoolDict = new Dictionary<Type, object>();
@@ -43,6 +43,8 @@ namespace TDFramework
         protected ClassObjectPool<GameObjectItem> m_gameObjectItemClassPool = null;
         //GameObjectItem的Guid为Key, GameObjectItem实例为对象的字典集合
         protected Dictionary<long, GameObjectItem> m_gameObjectItemDict = new Dictionary<long, GameObjectItem>();
+        //异步加载的GameObjectItem统计， key为Guid
+        protected Dictionary<long, GameObjectItem> m_asyncGameObjectItemDict = new Dictionary<long, GameObjectItem>(); 
         #endregion
 
         #region 方法
@@ -51,6 +53,89 @@ namespace TDFramework
             m_gameObjectItemClassPool = ObjectManager.Instance.GetOrCreateClassObjectPool<GameObjectItem>(1000);
             m_goPool = goPool;
             m_sceneGos = sceneGos;
+        }
+        //是否正在异步加载
+        public bool IsAsyncLoading(long guid)
+        {
+            return m_asyncGameObjectItemDict[guid] != null;
+        }
+        //判断是否GameObject是否是ObjectManager创建，是否是对象池形式创建的. 
+        public bool IsObjectManagerCreated(GameObject go)
+        {
+            GameObjectItem item = m_gameObjectItemDict[go.GetInstanceID()];
+            return item != null; 
+        }
+        //清空对象池
+        public void ClearCache()
+        {
+            List<uint> tempList = new List<uint>();
+            foreach(uint key in m_gameObjectItemPoolDict.Keys)
+            {
+                List<GameObjectItem> list = m_gameObjectItemPoolDict[key];
+                for(int i = list.Count - 1; i >= 0; --i)
+                {
+                    GameObjectItem item = list[i];
+                    if(System.Object.ReferenceEquals(item.Obj, null) && item.Clear)
+                    {
+                        list.Remove(item);                        
+                        GameObject.Destroy(item.Obj);
+                        m_gameObjectItemDict.Remove(item.Obj.GetInstanceID());
+                        item.Reset();
+                        m_gameObjectItemClassPool.Recycle(item);
+                    }
+                }
+                if(list.Count <= 0)
+                {
+                    tempList.Add(key);
+                }
+            }
+            for(int i = 0; i < tempList.Count; i++)
+            {
+                uint temp = tempList[i];
+                if(m_gameObjectItemPoolDict.ContainsKey(temp))
+                {
+                    m_gameObjectItemPoolDict.Remove(temp);
+                }
+            }
+            tempList.Clear();
+            tempList = null;
+        }
+        //清除某个资源在对象池中的所有对象
+        public void ClearPoolObject(uint crc)
+        {
+            List<GameObjectItem> st = null;
+            if(m_gameObjectItemPoolDict.TryGetValue(crc, out st) == false || st == null)
+            {
+                return;
+            }
+            for(int i = st.Count - 1; i >= 0; --i)
+            {
+                GameObjectItem item = st[i];
+                if(item.Clear)
+                {
+                    st.Remove(item);
+                    int tempId = item.Obj.GetInstanceID();
+                    GameObject.Destroy(item.Obj);
+                    item.Reset();
+                    m_gameObjectItemDict.Remove(tempId);
+                    m_gameObjectItemClassPool.Recycle(item);
+                }
+            }
+            if(st.Count <= 0)
+            {
+                m_gameObjectItemPoolDict.Remove(crc);
+            }
+        }
+        //取消某个GameObject的异步加载
+        public void CancelAsyncLoad(long guid)
+        {
+            GameObjectItem item = null;
+            if(m_asyncGameObjectItemDict.TryGetValue(guid, out item) && item != null && ResourceMgr.Instance.CancelAsyncLoad(item))
+            {
+                m_asyncGameObjectItemDict.Remove(guid);
+                item.Reset();
+                m_gameObjectItemClassPool.Recycle(item);
+            }
         }
         //预加载GameObject对象, 路径, 预加载个数, 跳场景是否清除
         public void Preload(string path, int count = -1, bool clear = false)
@@ -98,13 +183,13 @@ namespace TDFramework
             return gameObjectItem.Obj;
         }
         //GameObject异步加载资源
-        public void InstantiateAsync(string path, OnAsyncResourceObjFinished dealFinish, LoadAssetPriority priority,
+        public long InstantiateAsync(string path, OnAsyncResourceObjFinished dealFinish, LoadAssetPriority priority,
          bool setSceneObject = false, object param1 = null, object param2 = null, object param3 = null,
          bool bClear = true)
         {
             if (string.IsNullOrEmpty(path))
             {
-                return;
+                return 0;
             }
             uint crc = CrcHelper.StringToCRC32(path);
             GameObjectItem gameObjectItem = GetGameObjectItemFromPool(crc);
@@ -118,8 +203,9 @@ namespace TDFramework
                 {
                     dealFinish(path, gameObjectItem.Obj, param1, param2, param3);
                 }
-                return;
+                return gameObjectItem.Guid;
             }
+            long guid = ResourceMgr.Instance.CreateGuid();
             gameObjectItem = m_gameObjectItemClassPool.Spawn(true);
             gameObjectItem.Crc = crc;
             gameObjectItem.SetSceneParent = setSceneObject;
@@ -130,6 +216,7 @@ namespace TDFramework
             gameObjectItem.Param3 = param3;
             //调用ResourceManager异步加载接口
             ResourceMgr.Instance.AsyncLoadGameObjectItem(path, gameObjectItem, OnAsyncLoadGameObjectFinish, priority);
+            return guid;
         }
         //GameObject异步加载资源ResourceItem成功后的回调
         private void OnAsyncLoadGameObjectFinish(string path, GameObjectItem gameObjectItem,
@@ -145,6 +232,11 @@ namespace TDFramework
             else
             {
                 gameObjectItem.Obj = GameObject.Instantiate(gameObjectItem.ResourceItem.Obj) as GameObject;
+            }
+            //加载完成， 就从正在加载的异步中移除
+            if(m_asyncGameObjectItemDict.ContainsKey(gameObjectItem.Guid))
+            {
+                m_asyncGameObjectItemDict.Remove(gameObjectItem.Guid);
             }
             if(gameObjectItem.Obj != null && gameObjectItem.SetSceneParent)
             {

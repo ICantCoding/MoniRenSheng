@@ -48,6 +48,7 @@ namespace TDFramework.UIFramework
             m_canvasGroup = GetComponent<CanvasGroup>();
         }
         #endregion
+        
 
         #region 可继承重写方法
         public virtual void Hide()
